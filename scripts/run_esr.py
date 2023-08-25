@@ -38,7 +38,10 @@ def trapz(xvals, yvals, start, finish, n):
 
 
 def solve_inflation(eq_numpy, *a, fstring='', V11, V22, efolds=60, phi_max=40, print_n=True, plots=False, plot_title=''):
-     """ Slow roll inflation function.
+     """ Slow roll inflation function. Returns [100,100,100] for potentials that do not give rise to inflation, and [5,5,5]
+     for potentials where the parameters create a singularity. This distinction is made just so we can make use of it in the negloglike 
+     function. This version of the function is made to be inside ESR, so no constant potentials will be inputted at this point since
+     they are ignored in esr/fitting/test_all.py.
 
         Args:
             :eq_numpy (numpy function): function to use which gives the potential function, V (esr generated function)
@@ -66,7 +69,7 @@ def solve_inflation(eq_numpy, *a, fstring='', V11, V22, efolds=60, phi_max=40, p
     def V(x): return scaling*eq_numpy(x,*np.atleast_1d(a))  
     
     if np.isinf(V(1)) and np.isinf(V(2)):
-        print('inf parameter=',a,' in',fstring)
+        print('parameter singularity=',a,' in',fstring)
         return [5,5,5]
     
     def V1(x): return scaling*V11(x,*np.atleast_1d(a))
@@ -95,7 +98,7 @@ def solve_inflation(eq_numpy, *a, fstring='', V11, V22, efolds=60, phi_max=40, p
     
     "FIND PHI_END:"
     
-    phi1 = np.linspace(-phi_max, phi_max, 30000)
+    phi1 = np.linspace(-phi_max, phi_max, 30000) # redefinition of phi as this should work just as well with lower array size
     f = epsilon1(phi1)
     phi_ends=[]
     for i in range(len(phi1)-1):
@@ -117,16 +120,14 @@ def solve_inflation(eq_numpy, *a, fstring='', V11, V22, efolds=60, phi_max=40, p
     m_arr=[]
     for i in range(len(phi_ends)):
         phi_end=phi_ends[i]
-        #print('end',phi_end)
-        #print(phi_end)
         phi_star0=phi_end # guess for phi_start
         efold=0
-        step=.2*np.abs(phi_end)
+        step=.2*np.abs(phi_end) # this will affect the running time since a smaller step means the integration function will be called more often
         if V(phi_end)>=0:  
             if V(phi_end+1e-4)>V(phi_end): # check direction of integration
                 while efold<efolds and phi_star0<phi_max:
                     phi_star0 +=  step 
-                    xvals=np.linspace(phi_star0,phi_end,100)
+                    xvals=np.linspace(phi_star0,phi_end,100) # creating this array for every integration iteration is what slows down this function the most 
                     yvals=integrand(xvals)
                     efold = trapz(xvals,yvals,phi_star0, phi_end,100)
                 if efold>efolds:
@@ -262,7 +263,6 @@ class GaussLikelihood(Likelihood):
         """Likelihood class used to fit a function directly using a Gaussian likelihood
 
         """
-        #run_name='inflation'
         super().__init__(data_file, data_file, run_name, data_dir=data_dir)
         self.ylabel = r'$r$'    # for plotting
         self.xvar, self.yvar, self.yerr = np.loadtxt(self.data_file, unpack=True)
@@ -311,7 +311,7 @@ import esr.plotting.plot
 
 likelihood = GaussLikelihood('planck_ns.txt', 'inflation_extended', data_dir=os.getcwd())
 
-comp=4 # no results below comp=4 for the 'inflation_extended' basis functions
+comp=4            # no results below comp=4 for the 'inflation_extended' basis functions
 
 esr.fitting.test_all.main(comp, likelihood, log_opt=True)
 esr.fitting.test_all_Fisher.main(comp, likelihood)
