@@ -6,6 +6,7 @@ import warnings
 import os
 import sys
 import numdifftools as nd
+import time
 import itertools
 import esr.fitting.test_all as test_all
 import esr.fitting.test_all_Fisher as test_all_Fisher
@@ -19,34 +20,44 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
+def main(comp, likelihood, tmax=5, try_integration=False):
     """Apply results of fitting the unique functions to all functions and save to file
     
     Args:
         :comp (int): complexity of functions to consider
         :likelihood (fitting.likelihood object): object containing data, likelihood functions and file paths
         :tmax (float, default=5.): maximum time in seconds to run any one part of simplification procedure for a given function
-        :print_frequency (int, default=1000): the status of the fits will be printed every ``print_frequency`` number of iterations
         :try_integration (bool, default=False): when likelihood requires integral, whether to try to analytically integrate (True) or just numerically integrate (False)
         
     Returns:
         None
         
     """
+    print('Entered match.py')
+    
     if likelihood.is_mse:
         raise ValueError('Cannot use MSE with description length')
 
-    def fop(x):
-        return likelihood.negloglike(x,eq_numpy, integrated=integrated)
+    def fop(xx):
+        eq_s = sympy.sympify(fcn_i,locals={"inv": inv, "square": square, "cube": cube, "sqrt": sqrt, "log": log, "pow": pow, "x": x, "a0": a0, "a1": a1, "a2": a2, "a3": a3})
+        derivative_expr = sympy.diff(eq_s, x)
+        V_1 = sympy.lambdify([x] + all_a, derivative_expr, 'numpy')
+        derivative_expr2 = sympy.diff(derivative_expr, x)
+        V_2 = sympy.lambdify([x] + all_a, derivative_expr2, 'numpy')
+        return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
         
-    def f1(x):
-        return likelihood.negloglike([x],eq_numpy, integrated=integrated)
+    def f1(xx):
+        eq_s = sympy.sympify(fcn_i,locals={"inv": inv, "square": square, "cube": cube, "sqrt": sqrt, "log": log, "pow": pow, "x": x, "a0": a0})
+        derivative_expr = sympy.diff(eq_s, x)
+        V_1 = sympy.lambdify([x, a0], derivative_expr, 'numpy')
+        derivative_expr2 = sympy.diff(derivative_expr, x)
+        V_2 = sympy.lambdify([x, a0], derivative_expr2, 'numpy')
+        return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
         
-    if rank == 0:
-        print('\nMatching', flush=True)
-    
     invsubs_file = likelihood.fn_dir + "/compl_%i/inv_subs_%i.txt"%(comp,comp)
     match_file = likelihood.fn_dir + "/compl_%i/matches_%i.txt"%(comp,comp)
+    infl_sing_file = likelihood.out_dir + "/infl_sing_comp%i.dat"%(comp) 
+    #infl_sing is =0 for functions that didn't have parameters with Nsteps<1, =1 for functions that had that but the parameter could not be set to zero, and =-1 when the parameter was set to zero successfully 
     
     fcn_list_proc, data_start, data_end = test_all.get_functions(comp, likelihood, unique=False)
     negloglike, params_meas = test_all_Fisher.load_loglike(comp, likelihood, data_start, data_end, split=False)
@@ -54,6 +65,7 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
     
     all_inv_subs_proc = simplifier.load_subs(invsubs_file, max_param)[data_start:data_end]
     matches_proc = np.atleast_1d(np.loadtxt(match_file).astype(int))[data_start:data_end]
+    infl_sing_file = np.atleast_1d(np.loadtxt(infl_sing_file).astype(int))
 
     all_fish = np.loadtxt(likelihood.out_dir + '/derivs_comp'+str(comp)+'.dat')   # 2D array of shape (# unique fcns, 10)
     all_fish = np.atleast_2d(all_fish)
@@ -64,7 +76,7 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
     params = np.zeros([len(fcn_list_proc), max_param])
 
     for i in range(len(fcn_list_proc)):                 # The part of all eqs analysed by this proc
-        if i%print_frequency==0 and rank==0:
+        if i%1000==0 and rank==0:
             print(i, len(fcn_list_proc))
 
         fcn_i = fcn_list_proc[i].replace('\'', '')
@@ -72,11 +84,13 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
         nparams = simplifier.count_params([fcn_i], max_param)[0]
 
         index = matches_proc[i]          # Index in total unique eqs file, common to all procs
-
+        
+        infl_sing_i = infl_sing_file[index] ## file or proc?
+        
         index_arr[i] = index
 
         negloglike_all[i] = negloglike[index]           # Assign the likelihood of this variant to the that of the unique eq
-
+        
         if np.isnan(negloglike[index]) or np.isinf(negloglike[index]):          # Element of the unique eqs file, common to all procs
             codelen[i] = np.nan
             continue
@@ -102,24 +116,20 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
             codelen[i] = np.inf
             continue
         
-        try:
-            Delta = np.zeros(fish.shape)
-            m = (fish != 0)
-            Delta[m] = np.atleast_1d(np.sqrt(12./fish[m]))
-            Delta[~m] = np.inf
-            Nsteps = np.atleast_1d(np.abs(np.array(p)))
-            m = (Delta != 0)
-            Nsteps[m] /= Delta[m]
-            Nsteps[~m] = np.nan
-        except:
-            print('Error with function:', fcn_i)
-            codelen[i] = np.inf
-            continue
+        Delta = np.zeros(fish.shape)
+        m = (fish != 0)
+        Delta[m] = np.atleast_1d(np.sqrt(12./fish[m]))
+        Delta[~m] = np.inf
+        Nsteps = np.atleast_1d(np.abs(np.array(p)))
+        m = (Delta != 0)
+        Nsteps[m] /= Delta[m]
+        Nsteps[~m] = np.nan
         
         negloglike_orig = np.copy(negloglike_all[i])
         ptrue=np.copy(p)
         
         if np.sum(Nsteps<1)>0:         # should reevaluate -log(L) with the param(s) set to 0, but doesn't matter unless the fcn is a very good one
+            
             try:
                 p[Nsteps<1] = 0.         # Set any parameter to 0 that doesn't have at least one precision step, and recompute -log(L).
             except (IndexError, TypeError):
@@ -150,10 +160,10 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
                 else:
                     negloglike_all[i] = np.nan
 
-            except:
+            except Exception as exc:
                 negloglike_all[i] = np.nan
-                
-            if np.isfinite(negloglike_all[i]):
+             
+            if np.isfinite(negloglike_all[i]) and not negloglike_all[i]==1e10:
                 k -= np.sum(Nsteps<1)
                 kept_mask = Nsteps>=1
             else:
@@ -167,42 +177,32 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
                             negloglike_all[i] = f1(p)               # Modified here for this variant, but if this doesn't happen it stays the same as the unique eq
                         else:
                             negloglike_all[i] = fop(p)
+                        
                         if np.isfinite(negloglike_all[i]):
                             break
                 kept_mask = np.ones(len(p), dtype=bool)
-                if np.isfinite(negloglike_all[i]):
+                if np.isfinite(negloglike_all[i]) and not negloglike_all[i]==1e10:
                     k -= len(idx)
                     kept_mask[idx] = 0
-                elif not np.isfinite(negloglike_all[i]) and not np.isnan(negloglike_all[i]): # infinite nll
+                elif negloglike_all[i]==1e10 and infl_sing_i!=-1:
                     p = ptrue
-                    fish[Nsteps<1] = 12./(p[Nsteps<1]**2) # set uncertainty=parameter in this case
-                    codelen[i] = -k/2.*math.log(3.) + np.sum( 0.5*np.log(fish) + np.log(abs(np.array(p))) )
+                    fish[Nsteps<1] = 12./(p[Nsteps<1]**2)
                     negloglike_all[i] = negloglike_orig
-                    try:        # If p was an array, we can make a list out of it
-                        list_p = list(p)
-                        params[i,:] = np.pad(p, (0, max_param-len(p)))
-                    except:     # p is either a number or nothing
-                        if p:   # p is a number
-                            params[i,:] = 0
-                            params[i,0] = p
-                        else:
-                            params[i,:] = np.zeros(max_param)
-                    
-                    assert len(params[i,:])==max_param
-                    continue
 
+                elif not np.isfinite(negloglike_all[i]): # situation such as 1/a0, a0=0
+                    continue
+            
             if k<0:
                 print("This shouldn't have happened", flush=True)
                 quit()
             elif k==0:                  # If we have no parameters left then the parameter codelength is 0 so we can move on
                 continue
-            
-            fish = fish[kept_mask]      # Only consider these parameters in the codelen
+
+            fish = fish[kept_mask]
             p = p[kept_mask]
             
         else:
             kept_mask = np.ones(len(p), dtype=bool)
-        
         
         try:
             codelen[i] = -k/2.*math.log(3.) + np.sum( 0.5*np.log(fish) + np.log(abs(np.array(p))) )
@@ -224,7 +224,7 @@ def main(comp, likelihood, tmax=5, print_frequency=1000, try_integration=False):
         
         assert len(params[i,:])==max_param
         
-
+        
 
     out_arr = np.transpose(np.vstack([negloglike_all, codelen, index_arr] + [params[:,i] for i in range(max_param)]))
 
