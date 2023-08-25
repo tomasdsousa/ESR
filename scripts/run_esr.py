@@ -43,7 +43,7 @@ def solve_inflation(eq_numpy, *a, fstring='', V11, V22, efolds=60, phi_max=40, p
         Args:
             :eq_numpy (numpy function): function to use which gives the potential function, V (esr generated function)
             :a (list): parameters
-            :string (string): function string for plot title
+            :fstring (string): function string for plot title
             :V11 (numpy function): first derivative of eq_numpy
             :V22 (numpy function): second derivative of eq_numpy
             :efolds (float): efolds of expansion to consider
