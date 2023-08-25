@@ -25,7 +25,7 @@ import inspect
 #%% define functions
 from esr.fitting.likelihood import Likelihood
 import os
-runname='inflation'
+runname='inflation_extended'
 
 @nb.jit(nb.float64(nb.float64[:], nb.float64[:],nb.float64, nb.float64, nb.float64))
 def trapz(xvals, yvals, start, finish, n):
