@@ -1,7 +1,0 @@
-{a0: exp(a0)}
-{a0: exp(a0)}
-{a0: exp(a0)}
-{a0: log(Abs(a0))}
-{a0: log(Abs(a0))}
-{a0: log(Abs(a0))}
-{a0: log(Abs(a0))}
