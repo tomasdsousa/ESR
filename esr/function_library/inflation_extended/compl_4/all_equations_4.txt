@@ -1,0 +1,1152 @@
+1/x
+exp(x)
+log(x)
+sin(x)
+sqrt(x)
+x**3
+x**2
+exp(-1/x)
+exp(-exp(x))
+1/x
+exp(-sin(x))
+exp(-sqrt(x))
+exp(-x**3)
+exp(-x**2)
+1/log(1/x)
+1/x
+1/log(log(x))
+1/log(sin(x))
+1/log(sqrt(x))
+1/log(x**3)
+1/log(x**2)
+1/sin(1/x)
+1/sin(exp(x))
+1/sin(log(x))
+1/sin(sin(x))
+1/sin(sqrt(x))
+1/sin(x**3)
+1/sin(x**2)
+sqrt(x)
+exp(-x/2)
+1/sqrt(Abs(log(x)))
+1/sqrt(Abs(sin(x)))
+pow(x,(-1/4))
+pow(x,(-3/2))
+1/x
+x**3
+exp(-3*x)
+log(x)**(-3)
+sin(x)**(-3)
+pow(x,(-3/2))
+x**(-9)
+x**(-6)
+x**2
+exp(-2*x)
+log(x)**(-2)
+sin(x)**(-2)
+1/x
+x**(-6)
+x**(-4)
+exp(x)
+exp(exp(-x))
+exp(1/log(x))
+exp(1/sin(x))
+exp(1/sqrt(x))
+exp(x**(-3))
+exp(x**(-2))
+exp(exp(1/x))
+exp(exp(exp(x)))
+exp(x)
+exp(exp(sin(x)))
+exp(exp(sqrt(x)))
+exp(exp(x**3))
+exp(exp(x**2))
+1/x
+exp(x)
+log(x)
+sin(x)
+sqrt(x)
+x**3
+x**2
+exp(sin(1/x))
+exp(sin(exp(x)))
+exp(sin(log(x)))
+exp(sin(sin(x)))
+exp(sin(sqrt(x)))
+exp(sin(x**3))
+exp(sin(x**2))
+exp(1/sqrt(x))
+exp(exp(x/2))
+exp(sqrt(Abs(log(x))))
+exp(sqrt(Abs(sin(x))))
+exp(pow(x,(1/4)))
+exp(pow(x,(3/2)))
+exp(x)
+exp(x**(-3))
+exp(exp(3*x))
+exp(log(x)**3)
+exp(sin(x)**3)
+exp(pow(x,(3/2)))
+exp(x**9)
+exp(x**6)
+exp(x**(-2))
+exp(exp(2*x))
+exp(log(x)**2)
+exp(sin(x)**2)
+exp(x)
+exp(x**6)
+exp(x**4)
+log(x)
+-x
+log(1/log(x))
+log(1/sin(x))
+log(1/sqrt(x))
+log(x**(-3))
+log(x**(-2))
+1/x
+exp(x)
+log(x)
+sin(x)
+sqrt(x)
+x**3
+x**2
+log(log(1/x))
+log(x)
+log(log(log(x)))
+log(log(sin(x)))
+log(log(sqrt(x)))
+log(log(x**3))
+log(log(x**2))
+log(sin(1/x))
+log(sin(exp(x)))
+log(sin(log(x)))
+log(sin(sin(x)))
+log(sin(sqrt(x)))
+log(sin(x**3))
+log(sin(x**2))
+log(1/sqrt(x))
+x/2
+log(sqrt(Abs(log(x))))
+log(sqrt(Abs(sin(x))))
+log(pow(x,(1/4)))
+log(pow(x,(3/2)))
+log(x)
+log(x**(-3))
+3*x
+log(log(x)**3)
+log(sin(x)**3)
+log(pow(x,(3/2)))
+log(x**9)
+log(x**6)
+log(x**(-2))
+2*x
+log(log(x)**2)
+log(sin(x)**2)
+log(x)
+log(x**6)
+log(x**4)
+sin(x)
+sin(exp(-x))
+sin(1/log(x))
+sin(1/sin(x))
+sin(1/sqrt(x))
+sin(x**(-3))
+sin(x**(-2))
+sin(exp(1/x))
+sin(exp(exp(x)))
+sin(x)
+sin(exp(sin(x)))
+sin(exp(sqrt(x)))
+sin(exp(x**3))
+sin(exp(x**2))
+sin(log(1/x))
+sin(x)
+sin(log(log(x)))
+sin(log(sin(x)))
+sin(log(sqrt(x)))
+sin(log(x**3))
+sin(log(x**2))
+sin(sin(1/x))
+sin(sin(exp(x)))
+sin(sin(log(x)))
+sin(sin(sin(x)))
+sin(sin(sqrt(x)))
+sin(sin(x**3))
+sin(sin(x**2))
+sin(1/sqrt(x))
+sin(exp(x/2))
+sin(sqrt(Abs(log(x))))
+sin(sqrt(Abs(sin(x))))
+sin(pow(x,(1/4)))
+sin(pow(x,(3/2)))
+sin(x)
+sin(x**(-3))
+sin(exp(3*x))
+sin(log(x)**3)
+sin(sin(x)**3)
+sin(pow(x,(3/2)))
+sin(x**9)
+sin(x**6)
+sin(x**(-2))
+sin(exp(2*x))
+sin(log(x)**2)
+sin(sin(x)**2)
+sin(x)
+sin(x**6)
+sin(x**4)
+sqrt(x)
+exp(-x/2)
+1/sqrt(Abs(log(x)))
+1/sqrt(Abs(sin(x)))
+pow(x,(-1/4))
+pow(x,(-3/2))
+1/x
+exp(1/(2*x))
+exp(exp(x)/2)
+sqrt(x)
+exp(sin(x)/2)
+exp(sqrt(x)/2)
+exp(x**3/2)
+exp(x**2/2)
+sqrt(Abs(log(1/x)))
+sqrt(x)
+sqrt(Abs(log(log(x))))
+sqrt(Abs(log(sin(x))))
+sqrt(Abs(log(sqrt(x))))
+sqrt(Abs(log(x**3)))
+sqrt(Abs(log(x**2)))
+sqrt(Abs(sin(1/x)))
+sqrt(Abs(sin(exp(x))))
+sqrt(Abs(sin(log(x))))
+sqrt(Abs(sin(sin(x))))
+sqrt(Abs(sin(sqrt(x))))
+sqrt(Abs(sin(x**3)))
+sqrt(Abs(sin(x**2)))
+pow(x,(-1/4))
+exp(x/4)
+pow(Abs(log(x)),(1/4))
+pow(Abs(sin(x)),(1/4))
+pow(x,(1/8))
+pow(x,(3/4))
+sqrt(x)
+pow(x,(-3/2))
+exp(3*x/2)
+sqrt(Abs(log(x)))*Abs(log(x))
+sqrt(Abs(sin(x)))*Abs(sin(x))
+pow(x,(3/4))
+pow(x,(9/2))
+x**3
+1/x
+exp(x)
+Abs(log(x))
+Abs(sin(x))
+sqrt(x)
+x**3
+x**2
+x**3
+exp(-3*x)
+log(x)**(-3)
+sin(x)**(-3)
+pow(x,(-3/2))
+x**(-9)
+x**(-6)
+exp(3/x)
+exp(3*exp(x))
+x**3
+exp(3*sin(x))
+exp(3*sqrt(x))
+exp(3*x**3)
+exp(3*x**2)
+log(1/x)**3
+x**3
+log(log(x))**3
+log(sin(x))**3
+log(sqrt(x))**3
+log(x**3)**3
+log(x**2)**3
+sin(1/x)**3
+sin(exp(x))**3
+sin(log(x))**3
+sin(sin(x))**3
+sin(sqrt(x))**3
+sin(x**3)**3
+sin(x**2)**3
+pow(x,(-3/2))
+exp(3*x/2)
+pow(Abs(log(x)),(3/2))
+pow(Abs(sin(x)),(3/2))
+pow(x,(3/4))
+pow(x,(9/2))
+x**3
+x**(-9)
+exp(9*x)
+log(x)**9
+sin(x)**9
+pow(x,(9/2))
+x**27
+x**18
+x**(-6)
+exp(6*x)
+log(x)**6
+sin(x)**6
+x**3
+x**18
+x**12
+x**2
+exp(-2*x)
+log(x)**(-2)
+sin(x)**(-2)
+1/x
+x**(-6)
+x**(-4)
+exp(2/x)
+exp(2*exp(x))
+x**2
+exp(2*sin(x))
+exp(2*sqrt(x))
+exp(2*x**3)
+exp(2*x**2)
+log(1/x)**2
+x**2
+log(log(x))**2
+log(sin(x))**2
+log(sqrt(x))**2
+log(x**3)**2
+log(x**2)**2
+sin(1/x)**2
+sin(exp(x))**2
+sin(log(x))**2
+sin(sin(x))**2
+sin(sqrt(x))**2
+sin(x**3)**2
+sin(x**2)**2
+1/x
+exp(x)
+Abs(log(x))
+Abs(sin(x))
+sqrt(x)
+x**3
+x**2
+x**(-6)
+exp(6*x)
+log(x)**6
+sin(x)**6
+x**3
+x**18
+x**12
+x**(-4)
+exp(4*x)
+log(x)**4
+sin(x)**4
+x**2
+x**12
+x**8
+1/a0
+exp(a0)
+log(a0)
+sin(a0)
+sqrt(Abs(a0))
+a0**3
+a0**2
+exp(-1/a0)
+exp(-exp(a0))
+1/a0
+exp(-sin(a0))
+exp(-sqrt(Abs(a0)))
+exp(-a0**3)
+exp(-a0**2)
+1/log(1/a0)
+1/a0
+1/log(log(a0))
+1/log(sin(a0))
+1/log(sqrt(Abs(a0)))
+1/log(a0**3)
+1/log(a0**2)
+1/sin(1/a0)
+1/sin(exp(a0))
+1/sin(log(a0))
+1/sin(sin(a0))
+1/sin(sqrt(Abs(a0)))
+1/sin(a0**3)
+1/sin(a0**2)
+sqrt(Abs(a0))
+exp(-a0/2)
+1/sqrt(Abs(log(a0)))
+1/sqrt(Abs(sin(a0)))
+pow(Abs(a0),(-1/4))
+pow(Abs(a0),(-3/2))
+1/Abs(a0)
+a0**3
+exp(-3*a0)
+log(a0)**(-3)
+sin(a0)**(-3)
+pow(Abs(a0),(-3/2))
+a0**(-9)
+a0**(-6)
+a0**2
+exp(-2*a0)
+log(a0)**(-2)
+sin(a0)**(-2)
+1/Abs(a0)
+a0**(-6)
+a0**(-4)
+exp(a0)
+exp(exp(-a0))
+exp(1/log(a0))
+exp(1/sin(a0))
+exp(1/sqrt(Abs(a0)))
+exp(a0**(-3))
+exp(a0**(-2))
+exp(exp(1/a0))
+exp(exp(exp(a0)))
+exp(a0)
+exp(exp(sin(a0)))
+exp(exp(sqrt(Abs(a0))))
+exp(exp(a0**3))
+exp(exp(a0**2))
+1/a0
+exp(a0)
+log(a0)
+sin(a0)
+sqrt(Abs(a0))
+a0**3
+a0**2
+exp(sin(1/a0))
+exp(sin(exp(a0)))
+exp(sin(log(a0)))
+exp(sin(sin(a0)))
+exp(sin(sqrt(Abs(a0))))
+exp(sin(a0**3))
+exp(sin(a0**2))
+exp(1/sqrt(Abs(a0)))
+exp(exp(a0/2))
+exp(sqrt(Abs(log(a0))))
+exp(sqrt(Abs(sin(a0))))
+exp(pow(Abs(a0),(1/4)))
+exp(sqrt(Abs(a0))*Abs(a0))
+exp(Abs(a0))
+exp(a0**(-3))
+exp(exp(3*a0))
+exp(log(a0)**3)
+exp(sin(a0)**3)
+exp(pow(Abs(a0),(3/2)))
+exp(a0**9)
+exp(a0**6)
+exp(a0**(-2))
+exp(exp(2*a0))
+exp(log(a0)**2)
+exp(sin(a0)**2)
+exp(Abs(a0))
+exp(a0**6)
+exp(a0**4)
+log(a0)
+-a0
+log(1/log(a0))
+log(1/sin(a0))
+log(1/sqrt(Abs(a0)))
+log(a0**(-3))
+log(a0**(-2))
+log(exp(1/a0))
+exp(a0)
+log(a0)
+sin(a0)
+sqrt(Abs(a0))
+a0**3
+a0**2
+log(log(1/a0))
+log(a0)
+log(log(log(a0)))
+log(log(sin(a0)))
+log(log(sqrt(Abs(a0))))
+log(log(a0**3))
+log(log(a0**2))
+log(sin(1/a0))
+log(sin(exp(a0)))
+log(sin(log(a0)))
+log(sin(sin(a0)))
+log(sin(sqrt(Abs(a0))))
+log(sin(a0**3))
+log(sin(a0**2))
+log(1/sqrt(Abs(a0)))
+a0/2
+log(sqrt(Abs(log(a0))))
+log(sqrt(Abs(sin(a0))))
+log(pow(Abs(a0),(1/4)))
+log(sqrt(Abs(a0))*Abs(a0))
+log(Abs(a0))
+log(a0**(-3))
+3*a0
+log(log(a0)**3)
+log(sin(a0)**3)
+log(pow(Abs(a0),(3/2)))
+log(a0**9)
+log(a0**6)
+log(a0**(-2))
+2*a0
+log(log(a0)**2)
+log(sin(a0)**2)
+log(Abs(a0))
+log(a0**6)
+log(a0**4)
+sin(a0)
+sin(exp(-a0))
+sin(1/log(a0))
+sin(1/sin(a0))
+sin(1/sqrt(Abs(a0)))
+sin(a0**(-3))
+sin(a0**(-2))
+sin(exp(1/a0))
+sin(exp(exp(a0)))
+sin(a0)
+sin(exp(sin(a0)))
+sin(exp(sqrt(Abs(a0))))
+sin(exp(a0**3))
+sin(exp(a0**2))
+sin(log(1/a0))
+sin(a0)
+sin(log(log(a0)))
+sin(log(sin(a0)))
+sin(log(sqrt(Abs(a0))))
+sin(log(a0**3))
+sin(log(a0**2))
+sin(sin(1/a0))
+sin(sin(exp(a0)))
+sin(sin(log(a0)))
+sin(sin(sin(a0)))
+sin(sin(sqrt(Abs(a0))))
+sin(sin(a0**3))
+sin(sin(a0**2))
+sin(1/sqrt(Abs(a0)))
+sin(exp(a0/2))
+sin(sqrt(Abs(log(a0))))
+sin(sqrt(Abs(sin(a0))))
+sin(pow(Abs(a0),(1/4)))
+sin(sqrt(Abs(a0))*Abs(a0))
+sin(Abs(a0))
+sin(a0**(-3))
+sin(exp(3*a0))
+sin(log(a0)**3)
+sin(sin(a0)**3)
+sin(pow(Abs(a0),(3/2)))
+sin(a0**9)
+sin(a0**6)
+sin(a0**(-2))
+sin(exp(2*a0))
+sin(log(a0)**2)
+sin(sin(a0)**2)
+sin(Abs(a0))
+sin(a0**6)
+sin(a0**4)
+sqrt(Abs(a0))
+exp(-a0/2)
+1/sqrt(Abs(log(a0)))
+1/sqrt(Abs(sin(a0)))
+pow(Abs(a0),(-1/4))
+sqrt(1/(a0**2*Abs(a0)))
+1/Abs(a0)
+sqrt(exp(1/a0))
+exp(exp(a0)/2)
+sqrt(Abs(a0))
+exp(sin(a0)/2)
+exp(sqrt(Abs(a0))/2)
+exp(a0**3/2)
+exp(a0**2/2)
+sqrt(Abs(log(1/a0)))
+sqrt(Abs(a0))
+sqrt(Abs(log(log(a0))))
+sqrt(Abs(log(sin(a0))))
+sqrt(Abs(log(sqrt(Abs(a0)))))
+sqrt(Abs(log(a0**3)))
+sqrt(Abs(log(a0**2)))
+sqrt(Abs(sin(1/a0)))
+sqrt(Abs(sin(exp(a0))))
+sqrt(Abs(sin(log(a0))))
+sqrt(Abs(sin(sin(a0))))
+sqrt(Abs(sin(sqrt(Abs(a0)))))
+sqrt(Abs(sin(a0**3)))
+sqrt(Abs(sin(a0**2)))
+pow(Abs(a0),(-1/4))
+exp(a0/4)
+pow(Abs(log(a0)),(1/4))
+pow(Abs(sin(a0)),(1/4))
+pow(Abs(a0),(1/8))
+pow(Abs(a0),(1/4))*sqrt(Abs(Abs(a0)))
+sqrt(Abs(a0))
+sqrt(1/(a0**2*Abs(a0)))
+exp(3*a0/2)
+sqrt(Abs(log(a0)**3))
+sqrt(Abs(sin(a0)))*Abs(sin(a0))
+pow(Abs(a0),(3/4))
+a0**4*sqrt(Abs(a0))
+a0**2*Abs(a0)
+1/Abs(a0)
+exp(a0)
+sqrt(Abs(log(a0)**2))
+Abs(sin(a0))
+sqrt(Abs(a0))
+a0**2*Abs(a0)
+a0**2
+a0**3
+exp(-3*a0)
+log(a0)**(-3)
+sin(a0)**(-3)
+pow(Abs(a0),(-3/2))
+a0**(-9)
+a0**(-6)
+exp(3/a0)
+exp(3*exp(a0))
+a0**3
+exp(3*sin(a0))
+exp(3*sqrt(Abs(a0)))
+exp(3*a0**3)
+exp(3*a0**2)
+log(1/a0)**3
+a0**3
+log(log(a0))**3
+log(sin(a0))**3
+log(sqrt(Abs(a0)))**3
+log(a0**3)**3
+log(a0**2)**3
+sin(1/a0)**3
+sin(exp(a0))**3
+sin(log(a0))**3
+sin(sin(a0))**3
+sin(sqrt(Abs(a0)))**3
+sin(a0**3)**3
+sin(a0**2)**3
+pow(Abs(a0),(-3/2))
+exp(3*a0/2)
+pow(Abs(log(a0)),(3/2))
+pow(Abs(sin(a0)),(3/2))
+pow(Abs(a0),(3/4))
+a0**2*pow(Abs(a0),(5/2))
+a0**2*Abs(a0)
+a0**(-9)
+exp(9*a0)
+log(a0)**9
+sin(a0)**9
+pow(Abs(a0),(9/2))
+a0**27
+a0**18
+a0**(-6)
+exp(6*a0)
+log(a0)**6
+sin(a0)**6
+a0**2*Abs(a0)
+a0**18
+a0**12
+a0**2
+exp(-2*a0)
+log(a0)**(-2)
+sin(a0)**(-2)
+1/Abs(a0)
+a0**(-6)
+a0**(-4)
+exp(2/a0)
+exp(2*exp(a0))
+a0**2
+exp(2*sin(a0))
+exp(2*sqrt(Abs(a0)))
+exp(2*a0**3)
+exp(2*a0**2)
+log(1/a0)**2
+a0**2
+log(log(a0))**2
+log(sin(a0))**2
+log(sqrt(Abs(a0)))**2
+log(a0**3)**2
+log(a0**2)**2
+sin(1/a0)**2
+sin(exp(a0))**2
+sin(log(a0))**2
+sin(sin(a0))**2
+sin(sqrt(Abs(a0)))**2
+sin(a0**3)**2
+sin(a0**2)**2
+1/Abs(a0)
+exp(a0)
+Abs(log(a0))
+Abs(sin(a0))
+sqrt(Abs(a0))
+a0**2*Abs(a0)
+a0**2
+a0**(-6)
+exp(6*a0)
+log(a0)**6
+sin(a0)**6
+a0**2*Abs(a0)
+a0**18
+a0**12
+a0**(-4)
+exp(4*a0)
+log(a0)**4
+sin(a0)**4
+a0**2
+a0**12
+a0**8
+1/(2*x)
+x**(-2)
+zoo
+1
+exp(2*x)
+exp(x**2)
+1
+E
+log(2*x)
+log(x**2)
+zoo
+0
+sin(2*x)
+sin(x**2)
+0
+sin(1)
+sqrt(2)*sqrt(x)
+x
+0
+1
+8*x**3
+x**6
+0
+1
+4*x**2
+x**4
+0
+1
+1/(a0 + x)
+1/(a0*x)
+1/(-a0 + x)
+a0/x
+exp(a0 + x)
+exp(a0*x)
+exp(-a0 + x)
+exp(x/a0)
+log(a0 + x)
+log(a0*x)
+log(-a0 + x)
+log(x/a0)
+sin(a0 + x)
+sin(a0*x)
+-sin(a0 - x)
+sin(x/a0)
+sqrt(Abs(a0 + x))
+sqrt(x)*sqrt(Abs(a0))
+sqrt(Abs(a0 - x))
+sqrt(x)*sqrt(Abs(1/a0))
+(a0 + x)**3
+a0**3*x**3
+(-a0 + x)**3
+x**3/a0**3
+(a0 + x)**2
+a0**2*x**2
+(-a0 + x)**2
+x**2/a0**2
+1/(a0 + x)
+1/(a0*x)
+1/(a0 - x)
+x/a0
+exp(a0 + x)
+exp(a0*x)
+exp(a0 - x)
+exp(a0/x)
+log(a0 + x)
+log(a0*x)
+log(a0 - x)
+log(a0/x)
+sin(a0 + x)
+sin(a0*x)
+sin(a0 - x)
+sin(a0/x)
+sqrt(Abs(a0 + x))
+sqrt(x)*sqrt(Abs(a0))
+sqrt(Abs(a0 - x))
+sqrt(Abs(a0))/sqrt(x)
+(a0 + x)**3
+a0**3*x**3
+(a0 - x)**3
+a0**3/x**3
+(a0 + x)**2
+a0**2*x**2
+(a0 - x)**2
+a0**2/x**2
+1/(a0 + a1)
+1/(a0*a1)
+1/(a0 - a1)
+a1/a0
+exp(a0 + a1)
+exp(a0*a1)
+exp(a0 - a1)
+exp(a0/a1)
+log(a0 + a1)
+log(a0*a1)
+log(a0 - a1)
+log(a0/a1)
+sin(a0 + a1)
+sin(a0*a1)
+sin(a0 - a1)
+sin(a0/a1)
+sqrt(Abs(a0 + a1))
+sqrt(Abs(a0*a1))
+sqrt(Abs(a0 - a1))
+sqrt(Abs(a0/a1))
+(a0 + a1)**3
+a0**3*a1**3
+(a0 - a1)**3
+a0**3/a1**3
+(a0 + a1)**2
+a0**2*a1**2
+(a0 - a1)**2
+a0**2/a1**2
+x + 1/x
+1
+x - 1/x
+x**2
+x + exp(x)
+x*exp(x)
+x - exp(x)
+x*exp(-x)
+x + log(x)
+x*log(x)
+x - log(x)
+x/log(x)
+x + sin(x)
+x*sin(x)
+x - sin(x)
+x/sin(x)
+sqrt(x) + x
+pow(x,(3/2))
+-sqrt(x) + x
+sqrt(x)
+x**3 + x
+x**4
+-x**3 + x
+x**(-2)
+x**2 + x
+x**3
+-x**2 + x
+1/x
+x + 1/a0
+x/a0
+x - 1/a0
+a0*x
+x + exp(a0)
+x*exp(a0)
+x - exp(a0)
+x*exp(-a0)
+x + log(a0)
+x*log(a0)
+x - log(a0)
+x/log(a0)
+x + sin(a0)
+x*sin(a0)
+x - sin(a0)
+x/sin(a0)
+x + sqrt(Abs(a0))
+x*sqrt(Abs(a0))
+x - sqrt(Abs(a0))
+x/sqrt(Abs(a0))
+a0**3 + x
+a0**3*x
+-a0**3 + x
+x/a0**3
+a0**2 + x
+a0**2*x
+-a0**2 + x
+x/a0**2
+a0 + 1/x
+a0/x
+a0 - 1/x
+a0*x
+a0 + exp(x)
+a0*exp(x)
+a0 - exp(x)
+a0*exp(-x)
+a0 + log(x)
+a0*log(x)
+a0 - log(x)
+a0/log(x)
+a0 + sin(x)
+a0*sin(x)
+a0 - sin(x)
+a0/sin(x)
+a0 + sqrt(x)
+a0*sqrt(x)
+a0 - sqrt(x)
+a0/sqrt(x)
+a0 + x**3
+a0*x**3
+a0 - x**3
+a0/x**3
+a0 + x**2
+a0*x**2
+a0 - x**2
+a0/x**2
+a0 + 1/a1
+a0/a1
+a0 - 1/a1
+a0*a1
+a0 + exp(a1)
+a0*exp(a1)
+a0 - exp(a1)
+a0*exp(-a1)
+a0 + log(a1)
+a0*log(a1)
+a0 - log(a1)
+a0/log(a1)
+a0 + sin(a1)
+a0*sin(a1)
+a0 - sin(a1)
+a0/sin(a1)
+a0 + sqrt(Abs(a1))
+a0*sqrt(Abs(a1))
+a0 - sqrt(Abs(a1))
+a0/sqrt(Abs(a1))
+a0 + a1**3
+a0*a1**3
+a0 - a1**3
+a0/a1**3
+a0 + a1**2
+a0*a1**2
+a0 - a1**2
+a0/a1**2
+x + 1/x
+1
+-x + 1/x
+x**(-2)
+x + exp(x)
+x*exp(x)
+-x + exp(x)
+exp(x)/x
+x + log(x)
+x*log(x)
+-x + log(x)
+log(x)/x
+x + sin(x)
+x*sin(x)
+-x + sin(x)
+sin(x)/x
+sqrt(x) + x
+pow(x,(3/2))
+sqrt(x) - x
+1/sqrt(x)
+x**3 + x
+x**4
+x**3 - x
+x**2
+x**2 + x
+x**3
+x**2 - x
+x
+a0 + 1/x
+a0/x
+-a0 + 1/x
+1/(a0*x)
+a0 + exp(x)
+a0*exp(x)
+-a0 + exp(x)
+exp(x)/a0
+a0 + log(x)
+a0*log(x)
+-a0 + log(x)
+log(x)/a0
+a0 + sin(x)
+a0*sin(x)
+-a0 + sin(x)
+sin(x)/a0
+a0 + sqrt(x)
+a0*sqrt(x)
+-a0 + sqrt(x)
+sqrt(x)/a0
+a0 + x**3
+a0*x**3
+-a0 + x**3
+x**3/a0
+a0 + x**2
+a0*x**2
+-a0 + x**2
+x**2/a0
+x + 1/a0
+x/a0
+-x + 1/a0
+1/(a0*x)
+x + exp(a0)
+x*exp(a0)
+-x + exp(a0)
+exp(a0)/x
+x + log(a0)
+x*log(a0)
+-x + log(a0)
+log(a0)/x
+x + sin(a0)
+x*sin(a0)
+-x + sin(a0)
+sin(a0)/x
+x + sqrt(Abs(a0))
+x*sqrt(Abs(a0))
+-x + sqrt(Abs(a0))
+sqrt(Abs(a0))/x
+a0**3 + x
+a0**3*x
+a0**3 - x
+a0**3/x
+a0**2 + x
+a0**2*x
+a0**2 - x
+a0**2/x
+a1 + 1/a0
+a1/a0
+-a1 + 1/a0
+1/(a0*a1)
+a1 + exp(a0)
+a1*exp(a0)
+-a1 + exp(a0)
+exp(a0)/a1
+a1 + log(a0)
+a1*log(a0)
+-a1 + log(a0)
+log(a0)/a1
+a1 + sin(a0)
+a1*sin(a0)
+-a1 + sin(a0)
+sin(a0)/a1
+a1 + sqrt(Abs(a0))
+a1*sqrt(Abs(a0))
+-a1 + sqrt(Abs(a0))
+sqrt(Abs(a0))/a1
+a0**3 + a1
+a0**3*a1
+a0**3 - a1
+a0**3/a1
+a0**2 + a1
+a0**2*a1
+a0**2 - a1
+a0**2/a1
+exp(x)
+exp(-1/x)
+exp(-exp(x))
+1/x
+exp(-sin(x))
+exp(-sqrt(x))
+exp(-x**3)
+exp(-x**2)
+exp(-x/2)
+exp(-3*x)
+exp(-2*x)
+exp(exp(-x))
+exp(exp(x/2))
+exp(exp(3*x))
+exp(exp(2*x))
+-x
+x/2
+3*x
+2*x
+sin(exp(-x))
+sin(exp(x/2))
+sin(exp(3*x))
+sin(exp(2*x))
+exp(-x/2)
+exp(1/(2*x))
+exp(exp(x)/2)
+sqrt(x)
+exp(sin(x)/2)
+exp(sqrt(x)/2)
+exp(x**3/2)
+exp(x**2/2)
+exp(x/4)
+exp(3*x/2)
+exp(3*x/2)
+exp(x)
+exp(-3*x)
+exp(3/x)
+exp(3*exp(x))
+x**3
+exp(3*sin(x))
+exp(3*sqrt(x))
+exp(3*x**3)
+exp(3*x**2)
+exp(3*x/2)
+exp(3*x/2)
+exp(9*x)
+exp(6*x)
+exp(-2*x)
+exp(2/x)
+exp(2*exp(x))
+x**2
+exp(2*sin(x))
+exp(2*sqrt(x))
+exp(2*x**3)
+exp(2*x**2)
+exp(x)
+exp(6*x)
+exp(4*x)
+exp(a0)
+exp(-1/a0)
+exp(-exp(a0))
+1/a0
+exp(-sin(a0))
+exp(-sqrt(Abs(a0)))
+exp(-a0**3)
+exp(-a0**2)
+exp(-a0/2)
+exp(-3*a0)
+exp(-2*a0)
+exp(exp(-a0))
+exp(exp(a0/2))
+exp(exp(3*a0))
+exp(exp(2*a0))
+-a0
+a0/2
+3*a0
+2*a0
+sin(exp(-a0))
+sin(exp(a0/2))
+sin(exp(3*a0))
+sin(exp(2*a0))
+exp(-a0/2)
+exp(1/(2*a0))
+exp(exp(a0)/2)
+sqrt(a0)
+exp(sin(a0)/2)
+exp(sqrt(Abs(a0))/2)
+exp(a0**3/2)
+exp(a0**2/2)
+exp(a0/4)
+exp(3*a0/2)
+exp(3*a0/2)
+exp(a0)
+exp(-3*a0)
+exp(3/a0)
+exp(3*exp(a0))
+a0**3
+exp(3*sin(a0))
+exp(3*sqrt(Abs(a0)))
+exp(3*a0**3)
+exp(3*a0**2)
+exp(3*a0/2)
+exp(3*a0/2)
+exp(9*a0)
+exp(6*a0)
+exp(-2*a0)
+exp(2/a0)
+exp(2*exp(a0))
+a0**2
+exp(2*sin(a0))
+exp(2*sqrt(Abs(a0)))
+exp(2*a0**3)
+exp(2*a0**2)
+exp(a0)
+exp(6*a0)
+exp(4*a0)
+1/(2*x)
+zoo
+exp(2*x)
+1
+log(2*x)
+zoo
+sin(2*x)
+0
+sqrt(2)*sqrt(x)
+0
+8*x**3
+0
+4*x**2
+0
