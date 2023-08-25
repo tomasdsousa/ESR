@@ -232,6 +232,7 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
             elif negloglike==1e10: # this parameter list doesn't give inflation
                 infln_singularity = 1
                 theta_ML = theta_ML_orig
+                Fisher_diag[Nsteps<1] = 12./(theta_ML**2)
                 negloglike = negloglike_orig
                 k = nparam
             elif not np.isfinite(negloglike): # situation such as 1/a0, a0=0
