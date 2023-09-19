@@ -14,18 +14,11 @@ from esr.generation.simplifier import time_limit
 import esr.generation.simplifier
 
 class Likelihood:
-    """Likelihood class used to fit a function directly
-    
-    Args:
-        :data_file (str): Name of the file containing the data to use
-        :cov_file (str): Name of the file containing the errors/covariance on the data
-        :run_name (str): The name to be associated with this likelihood, e.g. 'my_esr_run'
-        :data_dir (str, default=None): The path containing the data and cov files
-        :fn_set (str, default='core_maths'): The name of the function set to use with the likelihood. Must match one of those defined in ``generation.duplicate_checker``
-    
-    """
 
-    def __init__(self, data_file, cov_file, run_name, data_dir=None, fn_set='core_maths'):
+    def __init__(self, data_file, cov_file, run_name, data_dir=None):
+        """Likelihood class used to fit a function directly
+        
+        """
 
         esr_dir = os.path.abspath(os.path.join(os.path.dirname(esr.generation.simplifier.__file__), '..', '')) + '/'
         if data_dir is None:
@@ -34,7 +27,8 @@ class Likelihood:
             self.data_dir = data_dir
         self.data_file = self.data_dir + '/' + data_file
         self.cov_file = self.data_dir + '/' + cov_file
-        self.fn_dir = esr_dir + "function_library/" + fn_set + "/"
+        # self.fn_dir = esr_dir + "function_library/core_maths/"
+        self.fn_dir = esr_dir + "function_library/"+run_name+"/"
         if data_dir is None:
             self.like_dir = esr_dir + "/fitting/"
         else:
@@ -42,6 +36,8 @@ class Likelihood:
         if not os.path.isdir(self.like_dir):
             os.mkdir(self.like_dir)
         self.fnprior_prefix = "aifeyn_"
+        # self.fnprior_prefix = "katz_logprior_2_"
+        # self.fnprior_prefix = "katz_logprior_3_"
         self.combineDL_prefix = "combine_DL_"
         self.final_prefix = "final_"
         
@@ -50,7 +46,7 @@ class Likelihood:
         self.out_dir = self.base_out_dir + "/output_" + run_name
         self.fig_dir = self.base_out_dir + "/figs_" + run_name
         
-        # Warning to not use MSE for DL
+        # Warning to not use MSE for DL
         self.is_mse = False
 
     def get_pred(self, x, a, eq_numpy, **kwargs):
@@ -91,6 +87,7 @@ class Likelihood:
 
         eq = sympy.sympify(fcn_i,
                     locals={"inv": inv,
+                            "exp": exp,
                             "square": square,
                             "cube": cube,
                             "sqrt": sqrt,
@@ -105,14 +102,14 @@ class Likelihood:
 
 
 class CCLikelihood(Likelihood):
-    """Likelihood class used to fit cosmic chronometer data.
-    Should be used as a template for other likelihoods as all functions in this class are required in fitting functions.
-    
-    """
-        
-    def __init__(self):
 
-        super().__init__('CC_Hubble.dat', 'CC_Hubble.dat', 'cc_dimful')
+    def __init__(self):
+        """Likelihood class used to fit cosmic chronometer data.
+        Should be used as a template for other likelihoods as all functions in this class are required in fitting functions.
+        
+        """
+
+        super().__init__('CC_Hubble.dat', 'CC_Hubble.dat', 'cc_dim_push')
         
         self.Hfid = 1.
         self.ylabel = r'$H \left( z \right) \ / \ H_{\rm fid}$'  # for plotting
@@ -160,9 +157,9 @@ class CCLikelihood(Likelihood):
 
 
 class PanthLikelihood(Likelihood):
-    """Likelihood class used to fit Pantheon data"""
-    
+
     def __init__(self):
+        """Likelihood class used to fit Pantheon data"""
 
         super().__init__(
             '/DataRelease/Pantheon+_Data/4_DISTANCES_AND_COVAR/Pantheon+SH0ES.dat',
@@ -176,7 +173,7 @@ class PanthLikelihood(Likelihood):
         ww = (data['zHD']>0.01)
         zCMB = data['zHD'][ww]
         mu_obs = data['MU_SH0ES'][ww]
-        mu_err = data['MU_SH0ES_ERR_DIAG'][ww]  # for plotting
+        mu_err = data['MU_SH0ES_ERR_DIAG'][ww]  # for plotting
         
         with open(self.cov_file, 'r') as f:
             line = f.readline()
@@ -298,6 +295,7 @@ class PanthLikelihood(Likelihood):
 
         eq = sympy.sympify(fcn_i,
                     locals={"inv": inv,
+                            "exp": exp,
                             "square": square,
                             "cube": cube,
                             "sqrt": sqrt,
@@ -327,16 +325,15 @@ class PanthLikelihood(Likelihood):
 
 
 class MockLikelihood(Likelihood):
-    """Likelihood class used to fit mock cosmic chronometer data
-    
-    Args:
-        :nz (int): number of mock redshifts to use
-        :yfracerr (float): the fractional uncertainty on the cosmic chronometer mock we are using
-        :data_dir (str, default=None): The path containing the data and cov files
-    
-    """
-        
+
     def __init__(self, nz, yfracerr, data_dir=None):
+        """Likelihood class used to fit mock cosmic chronometer data
+        
+        Args:
+            :nz (int): number of mock redshifts to use
+            :yfracerr (float): the fractional uncertainty on the cosmic chronometer mock we are using
+        
+        """
         super().__init__(
             '/mock/CC_Hubble_%i_'%nz + str(yfracerr) + '.dat',
             '/mock/CC_Hubble_%i_'%nz + str(yfracerr) + '.dat',
@@ -389,33 +386,27 @@ class MockLikelihood(Likelihood):
 
 
 class MSE(Likelihood):
-    """Likelihood class used to fit a function directly using a MSE
-    
-    IMPORTANT - MSE is NOT a likelihood in the probabilistic sense.
-    It should not be used for MDL calculations as the answer will
-    be nonesense since an uncertainty is required for MDL to have meaning.
-    
-    Args:
-        :data_file (str): Name of the file containing the data to use
-        :run_name (str): The name to be associated with this likelihood, e.g. 'my_esr_run'
-        :data_dir (str, default=None): The path containing the data and cov files
-        :fn_set (str, default='core_maths'): The name of the function set to use with the likelihood. Must match one of those defined in ``generation.duplicate_checker``
-    
-    """
 
-    def __init__(self, data_file, run_name, data_dir=None, fn_set='core_maths'):
+    def __init__(self, data_file, run_name, data_dir=None):
+        """Likelihood class used to fit a function directly using a MSE
         
-        super().__init__(data_file, data_file, run_name, data_dir=data_dir, fn_set=fn_set)
+        IMPORTANT - MSE is NOT a likelihood in the probabilistic sense.
+        It should not be used for MDL calculations as the answer will
+        be nonesense since an uncertainty is required for MDL to have meaning.
+        
+        """
+        
+        super().__init__(data_file, data_file, run_name, data_dir=data_dir)
         self.ylabel = r'$y$'    # for plotting
-        self.xvar, self.yvar, self.yerr = np.loadtxt(self.data_file, unpack=True)
+        self.xvar, self.yvar, self.yerr = np.loadtxt(self.data_file, unpack=True)[:,:2]
         self.yerr = 0.
         
         warnings.warn("You are using the MSE class. MSE is NOT a likelihood in the probabilistic sense. It should not be used for MDL calculations as the answer will be nonesense since an uncertainty is required for MDL to have meaning.")
-        self.is_mse = True # Warning to not use MSE for DL
+        self.is_mse = True # Warning to not use MSE for DL
 
 
     def negloglike(self, a, eq_numpy, **kwargs):
-        """Negative log-likelihood for a given function. Here it is (y-ypred)^2
+        """Negative log-likelihood for a given function. Here it is |y-ypred|^2
         Note that this is technically not a log-likelihood, but the function
         name is required to be accessed by other functions.
         
@@ -438,19 +429,13 @@ class MSE(Likelihood):
 
 
 class GaussLikelihood(Likelihood):
-    """Likelihood class used to fit a function directly using a Gaussian likelihood
-    
-    Args:
-        :data_file (str): Name of the file containing the data to use
-        :run_name (str): The name to be associated with this likelihood, e.g. 'my_esr_run'
-        :data_dir (str, default=None): The path containing the data and cov files
-        :fn_set (str, default='core_maths'): The name of the function set to use with the likelihood. Must match one of those defined in ``generation.duplicate_checker``
-    
-    """
 
-    def __init__(self, data_file, run_name, data_dir=None, fn_set='core_maths'):
+    def __init__(self, data_file, run_name, data_dir=None):
+        """Likelihood class used to fit a function directly using a Gaussian likelihood
         
-        super().__init__(data_file, data_file, run_name, data_dir=data_dir, fn_set=fn_set)
+        """
+        
+        super().__init__(data_file, data_file, run_name, data_dir=data_dir)
         self.ylabel = r'$y$'    # for plotting
         self.xvar, self.yvar, self.yerr = np.loadtxt(self.data_file, unpack=True)
 
@@ -478,19 +463,13 @@ class GaussLikelihood(Likelihood):
         
 
 class PoissonLikelihood(Likelihood):
-    """Likelihood class used to fit a function directly using a Poisson likelihood
-    
-    Args:
-        :data_file (str): Name of the file containing the data to use
-        :run_name (str): The name to be associated with this likelihood, e.g. 'my_esr_run'
-        :data_dir (str, default=None): The path containing the data and cov files
-        :fn_set (str, default='core_maths'): The name of the function set to use with the likelihood. Must match one of those defined in ``generation.duplicate_checker``
-    
-    """
+
+    def __init__(self, data_file, run_name, data_dir=None):
+        """Likelihood class used to fit a function directly using a Poisson likelihood
         
-    def __init__(self, data_file, run_name, data_dir=None, fn_set='core_maths'):
+        """
         
-        super().__init__(data_file, data_file, run_name, data_dir=data_dir, fn_set=fn_set)
+        super().__init__(data_file, data_file, run_name, data_dir=data_dir)
         self.ylabel = r'$y$'    # for plotting
         self.xvar, self.yvar = np.loadtxt(self.data_file, unpack=True)
         self.yerr = np.sqrt(self.yvar)
