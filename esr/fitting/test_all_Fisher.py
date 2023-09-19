@@ -14,6 +14,7 @@ from esr.fitting.sympy_symbols import *
 import esr.generation.simplifier as simplifier
 import matplotlib.pyplot as plt
 from scipy.stats import mode
+import traceback
 
 warnings.filterwarnings("ignore")
 
@@ -68,7 +69,6 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
         :codelen (float): the parameteric contribution to the description length of this function
         
     """
-    print('THETA', theta_ML)
     nparam = simplifier.count_params([fcn_i], max_param)[0]
     infln_singularity = 0
     
@@ -109,10 +109,13 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
     d_list = [.1,1.e-5, 10.**(-5.5), 10.**(-4.5), 1.e-6, 1.e-4, 10.**(-6.5), 10.**(-3.5), 1.e-7, 1.e-3, 10.**(-7.5), 10.**(-2.5), 1.e-8, 1.e-2, 1.e-9, 1.e-10, 1.e-11]
     
     method_list = ["central", "forward", "backward"]
+    # method_list = ["central", "complex", "multicomplex"]
 
     if nparam == 0:
-        codelen = 0
+        codelen = np.nan
         return params, negloglike, deriv, codelen, infln_singularity
+    
+    
 
     try:
         if nparam > 1:
@@ -127,11 +130,13 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
         deriv[:] = np.nan
         return params, negloglike, deriv, codelen, infln_singularity
     
+    
+
     # Get Hessian
     theta_ML = theta_ML[:nparam]
     Hfun = nd.Hessian(fop)#,step=1e-13)
     Hmat = Hfun(theta_ML)
-
+    
     # 2nd derivatives of -log(L) wrt params
     Fisher_diag = np.array([Hmat[i,i] for i in range(nparam)])
     # Precision to know constants
@@ -170,7 +175,7 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
            repeated_elements_exist = False
        else:
            repeated_elements_exist = len(Delta_array_round[:,0]) != len(set(Delta_array_round[:,0]))
-       
+
        if repeated_elements_exist:
            Delta_mode = mode(Delta_array_round)[0][0]
            mode_ind = np.where(Delta_array_round == Delta_mode)[0][0]
@@ -200,7 +205,7 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
                for i in range(nparam):
                    start = int(i * max_param - (i - 1) * i / 2)
                    deriv[start:start+nparam-i] = Hmat_array_f[mode_ind][i,i:]
-        
+
     # Must indicate a bad fcn, so just need to make sure it doesn't have a good -log(L)
     if (np.sum(Fisher_diag <= 0.) > 0.) or (np.sum(np.isnan(Fisher_diag)) > 0):
         codelen = np.nan
@@ -226,19 +231,23 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
             for r in reversed(range(1, len(try_idx))):
                 for idx in itertools.combinations(try_idx, r):
                     theta_ML = np.copy(theta_ML_orig)
-                    theta_ML[idx] = 0.
+                    for idx_ in idx:
+                        theta_ML[idx_] = 0.
                     negloglike = fop(theta_ML)
-                    if np.isfinite(negloglike):
+                    if np.isfinite(negloglike) and not negloglike==1e10:
                         break
             kept_mask = np.ones(len(theta_ML), dtype=bool)
             if np.isfinite(negloglike) and not negloglike==1e10: # can set to zero normally
                 infln_singularity = -1
                 k -= len(idx)
-                kept_mask[idx] = 0
+                codelen = np.nan
+                negloglike = np.nan
+                return params, negloglike, deriv, codelen, infln_singularity
+
             elif negloglike==1e10: # this parameter list doesn't give inflation
                 infln_singularity = 1
                 theta_ML = theta_ML_orig
-                Fisher_diag[Nsteps<1] = 12./(theta_ML**2)
+                Fisher_diag[Nsteps<1] = 12./(theta_ML_orig[Nsteps<1]**2) #########
                 negloglike = negloglike_orig
                 k = nparam
             elif not np.isfinite(negloglike): # situation such as 1/a0, a0=0
@@ -251,7 +260,9 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
             print("This shouldn't have happened", flush=True)
             quit()
         elif k==0:
-            codelen = 0
+            codelen = np.nan
+            # not interested in functions with no parameters so we discard it
+            negloglike = np.nan
             return params, negloglike, deriv, codelen, infln_singularity
         
         Fisher_diag = Fisher_diag[kept_mask]     # Only consider these parameters in the codelen
@@ -262,6 +273,9 @@ def convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike, max_
     
     codelen = -k/2.*math.log(3.) + np.sum( 0.5*np.log(Fisher_diag) + np.log(abs(np.array(theta_ML))) )
     
+    if codelen==0:
+        codelen=np.nan # not interested in functions without parameters
+
     # New params after the setting to 0, padded to length max_param as always
     theta_ML = theta_ML_orig
     theta_ML[~kept_mask] = 0.
@@ -283,7 +297,8 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         None
     
     """
-    
+
+
     if likelihood.is_mse:
         raise ValueError('Cannot use MSE with description length')
 
@@ -299,39 +314,52 @@ def main(comp, likelihood, tmax=5, try_integration=False):
     deriv = np.zeros([len(fcn_list_proc), int(max_param * (max_param+1) / 2)])
     infl_sing = np.zeros(len(fcn_list_proc))
     
-    for i in range(len(fcn_list_proc)):           # Consider all possible complexities
-        if rank == 0:
-            print(i, len(fcn_list_proc), flush=True)
+    finish_fn = len(fcn_list_proc) -1 
 
+    for i in range(len(fcn_list_proc)):           # Consider all possible complexities
+        if rank==0:    
+            print(i, len(fcn_list_proc),'F', flush=True)
+            
         if np.isnan(negloglike[i]) or np.isinf(negloglike[i]):
             codelen[i]=np.nan
             continue
 
         theta_ML = params_proc[i,:]
             
+        if negloglike[i]<-8:
+            tlim = 60 # after looking at exceptions I noticed many very good functions being timed out 
+        else:
+            tlim = 10 
         try:
-            fcn_i = fcn_list_proc[i].replace('\n', '')
-            fcn_i = fcn_list_proc[i].replace('\'', '')
-            fcn_i, eq, integrated = likelihood.run_sympify(fcn_i, tmax=tmax, try_integration=try_integration)
-            params[i,:], negloglike[i], deriv[i,:], codelen[i], infl_sing[i] = convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike[i], max_param=max_param)
-        except NameError:
-            # Occurs if function produced not implemented in numpy
-            if try_integration:
+            with simplifier.time_limit(tlim):
                 fcn_i = fcn_list_proc[i].replace('\n', '')
                 fcn_i = fcn_list_proc[i].replace('\'', '')
-                fcn_i, eq, integrated = likelihood.run_sympify(fcn_i, tmax=tmax, try_integration=False)
+                fcn_i, eq, integrated = likelihood.run_sympify(fcn_i, tmax=tmax, try_integration=try_integration)
                 params[i,:], negloglike[i], deriv[i,:], codelen[i], infl_sing[i] = convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike[i], max_param=max_param)
+        except NameError as namer:
+            print('NameError', namer)
+            traceback.print_exc()
+                # Occurs if function produced not implemented in numpy
+            if try_integration:
+                with simplifier.time_limit(tlim):
+                    fcn_i = fcn_list_proc[i].replace('\n', '')
+                    fcn_i = fcn_list_proc[i].replace('\'', '')
+                    fcn_i, eq, integrated = likelihood.run_sympify(fcn_i, tmax=tmax, try_integration=False)
+                    params[i,:], negloglike[i], deriv[i,:], codelen[i], infl_sing[i] = convert_params(fcn_i, eq, integrated, theta_ML, likelihood, negloglike[i], max_param=max_param)
             else:
                 params[i,:] = 0.
                 deriv[i,:] = 0.
                 codelen[i] = 0
                 infl_sing[i] = 0
 
-        except:
+        except Exception as exc:
+            if negloglike[i]<-8:
+                print(exc,'for',fcn_list_proc[i], negloglike[i])
             params[i,:] = 0.
             deriv[i,:] = 0.
             codelen[i] = 0
             infl_sing[i] = 0
+
         
     out_arr = np.transpose(np.vstack([codelen, negloglike] + [params[:,i] for i in range(max_param)]))
     out_arr_inflsing = np.transpose([infl_sing])
