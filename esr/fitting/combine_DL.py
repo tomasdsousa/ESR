@@ -147,7 +147,7 @@ def main(comp, likelihood):
         if os.path.exists(likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat'):           # Start this file from scratch here
             os.remove(likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat')
 
-        Nfuncs = 15
+        Nfuncs = 30
 
         Prel_DL = np.zeros(len(negloglike_sort))+np.inf
         negloglike_previous = np.nan
