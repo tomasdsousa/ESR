@@ -91,7 +91,7 @@ def main(comp, likelihood, tmax=5, try_integration=False):
 
         index = matches_proc[i]          # Index in total unique eqs file, common to all procs
         
-        infl_sing_i = infl_sing_file[index] ## file or proc?
+        infl_sing_i = infl_sing_file[index] 
         
 
         if infl_sing_i==-1:
