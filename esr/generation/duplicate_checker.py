@@ -34,30 +34,33 @@ def main(runname, compl, track_memory=False, search_tmax=60, expand_tmax=1, seed
     """
 
     if runname == 'keep_duplicates':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["square", "exp", "inv", "sqrt_abs", "log_abs"],  # type1
                 ["+", "*", "-", "/", "pow"]]  # type2
     elif runname == 'core_maths':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["inv"],  # type1
                 ["+", "*", "-", "/", "pow"]]  # type2
     elif runname == 'ext_maths':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["inv", "sqrt_abs", "square", "exp"],  # type1
                 ["+", "*", "-", "/", "pow"]]  # type2
     elif runname == 'osc_maths':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["inv", "sin"],  # type1
                 ["+", "*", "-", "/", "pow"]]  # type2
     elif runname == 'inflation':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["inv", "square", "cube", "exp"],  # type1
                 ["+", "*", "-", "/"]]  # type2
     elif runname == 'inflation_extended':
-        basis_functions = [["x", "a"],  # type0
+        basis_functions = [["x", "a"],  # type0
                 ["inv", "exp", "log", "sin", "sqrt_abs","cube", "square"],  # type1
                 ["+", "*", "-", "/"]]  # type2
-
+    elif runname == 'inflation_2':
+        basis_functions = [["x", "a"],  # type0
+                ["inv", "exp", "log"],  # type1
+                ["+", "*", "-", "/", "pow"]]  # type2
 
     dirname = os.path.abspath(os.path.join(os.path.dirname(generator.__file__), '..', 'function_library'))
     if not os.path.isdir(dirname):
@@ -101,14 +104,9 @@ def main(runname, compl, track_memory=False, search_tmax=60, expand_tmax=1, seed
         print('\nGetting extra_orig indices')
         sys.stdout.flush()
 
-    start = time.time()
     # Convert list of equations to list of indices
     extra_orig = utils.get_match_indexes(all_fun, extra_orig)
-    end = time.time()
 
-    if rank == 0:
-        print(end - start)
-        sys.stdout.flush()
 
     if nextra > 0:
         # Get str and sympy of the original equations
@@ -165,7 +163,7 @@ def main(runname, compl, track_memory=False, search_tmax=60, expand_tmax=1, seed
 
     if rank == 0:
     
-        # Shuffle the unique equations
+        # Shuffle the unique equations
         print('\nShuffling')
         sys.stdout.flush()
         np.random.seed(seed)
@@ -265,10 +263,8 @@ def main(runname, compl, track_memory=False, search_tmax=60, expand_tmax=1, seed
         all_fname = ['unique_equations_', 'all_equations_', 'trees_', 'orig_trees_', 'extra_trees_']
         for fname in all_fname:
             s = "sed 's/.$//; s/^.//' %s/%s%i.txt > %s/temp_%i.txt"%(dirname,fname,compl,dirname,compl)
-            print(s)
             os.system(s)
             s = "mv %s/temp_%i.txt %s/%s%i.txt"%(dirname,compl,dirname,fname,compl)
-            print(s)
             os.system(s)
 
         del all_inv_subs; gc.collect()
