@@ -33,7 +33,8 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         None
         
     """
-    print('Entered match.py')
+    if rank==0:
+        print('Entered match.py')
     
     if likelihood.is_mse:
         raise ValueError('Cannot use MSE with description length')
@@ -44,7 +45,10 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         V_1 = sympy.lambdify([x] + all_a, derivative_expr, 'numpy')
         derivative_expr2 = sympy.diff(derivative_expr, x)
         V_2 = sympy.lambdify([x] + all_a, derivative_expr2, 'numpy')
-        return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
+        try:
+            return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
+        except:
+            return np.nan
         
     def f1(xx):
         eq_s = sympy.sympify(fcn_i,locals={"inv": inv, "square": square, "cube": cube, "sqrt": sqrt, "log": log, "pow": pow, "x": x, "a0": a0})
@@ -52,12 +56,14 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         V_1 = sympy.lambdify([x, a0], derivative_expr, 'numpy')
         derivative_expr2 = sympy.diff(derivative_expr, x)
         V_2 = sympy.lambdify([x, a0], derivative_expr2, 'numpy')
-        return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
+        try:
+            return likelihood.negloglike(xx,eq_numpy,fcn_i, dd1=V_1, dd2=V_2, integrated=integrated)
+        except:
+            return np.nan
         
     invsubs_file = likelihood.fn_dir + "/compl_%i/inv_subs_%i.txt"%(comp,comp)
     match_file = likelihood.fn_dir + "/compl_%i/matches_%i.txt"%(comp,comp)
-    infl_sing_file = likelihood.out_dir + "/infl_sing_comp%i.dat"%(comp) 
-    #infl_sing is =0 for functions that didn't have parameters with Nsteps<1, =1 for functions that had that but the parameter could not be set to zero, and =-1 when the parameter was set to zero successfully 
+    infl_sing_file = likelihood.out_dir + "/infl_sing_comp%i.dat"%(comp)
     
     fcn_list_proc, data_start, data_end = test_all.get_functions(comp, likelihood, unique=False)
     negloglike, params_meas = test_all_Fisher.load_loglike(comp, likelihood, data_start, data_end, split=False)
@@ -87,6 +93,10 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         
         infl_sing_i = infl_sing_file[index] ## file or proc?
         
+
+        if infl_sing_i==-1:
+            continue
+        
         index_arr[i] = index
 
         negloglike_all[i] = negloglike[index]           # Assign the likelihood of this variant to the that of the unique eq
@@ -96,6 +106,7 @@ def main(comp, likelihood, tmax=5, try_integration=False):
             continue
 
         if nparams==0:
+            codelen[i] = np.nan
             continue
         else:
             k = nparams
@@ -129,7 +140,6 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         ptrue=np.copy(p)
         
         if np.sum(Nsteps<1)>0:         # should reevaluate -log(L) with the param(s) set to 0, but doesn't matter unless the fcn is a very good one
-            
             try:
                 p[Nsteps<1] = 0.         # Set any parameter to 0 that doesn't have at least one precision step, and recompute -log(L).
             except (IndexError, TypeError):
@@ -161,7 +171,9 @@ def main(comp, likelihood, tmax=5, try_integration=False):
                     negloglike_all[i] = np.nan
 
             except Exception as exc:
+                print('Exception', exc)
                 negloglike_all[i] = np.nan
+
              
             if np.isfinite(negloglike_all[i]) and not negloglike_all[i]==1e10:
                 k -= np.sum(Nsteps<1)
@@ -178,7 +190,7 @@ def main(comp, likelihood, tmax=5, try_integration=False):
                         else:
                             negloglike_all[i] = fop(p)
                         
-                        if np.isfinite(negloglike_all[i]):
+                        if np.isfinite(negloglike_all[i]) and not negloglike_all[i]==1e10:
                             break
                 kept_mask = np.ones(len(p), dtype=bool)
                 if np.isfinite(negloglike_all[i]) and not negloglike_all[i]==1e10:
@@ -188,7 +200,7 @@ def main(comp, likelihood, tmax=5, try_integration=False):
                     p = ptrue
                     fish[Nsteps<1] = 12./(p[Nsteps<1]**2)
                     negloglike_all[i] = negloglike_orig
-
+                    
                 elif not np.isfinite(negloglike_all[i]): # situation such as 1/a0, a0=0
                     continue
             
@@ -196,8 +208,10 @@ def main(comp, likelihood, tmax=5, try_integration=False):
                 print("This shouldn't have happened", flush=True)
                 quit()
             elif k==0:                  # If we have no parameters left then the parameter codelength is 0 so we can move on
+                codelen[i] = np.nan # not interested in functions with no parameters
                 continue
-
+            
+            
             fish = fish[kept_mask]
             p = p[kept_mask]
             
@@ -211,7 +225,15 @@ def main(comp, likelihood, tmax=5, try_integration=False):
         
         p = ptrue
         p[~kept_mask]=0.
-            
+        
+        if list(p).count(0)>(len(list(p))-nparams) and len(list(p))>1: # if one of the param is zero, this fcn already appeared, optimised, at lower complexity
+            codelen[i] = np.nan
+            continue
+
+        if list(p).count(0)==len(list(p)) or codelen[i]==0: # not interested in fcn with no param
+            codelen[i] = np.nan
+            continue
+
         try:        # If p was an array, we can make a list out of it
             list_p = list(p)
             params[i,:] = np.pad(p, (0, max_param-len(p)))
@@ -223,13 +245,15 @@ def main(comp, likelihood, tmax=5, try_integration=False):
                 params[i,:] = np.zeros(max_param)
         
         assert len(params[i,:])==max_param
-        
+        if negloglike_all[i]==1e10:
+            negloglike_all[i]=np.nan
         
 
+    
     out_arr = np.transpose(np.vstack([negloglike_all, codelen, index_arr] + [params[:,i] for i in range(max_param)]))
-
+    
     np.savetxt(likelihood.temp_dir + '/codelen_matches_'+str(comp)+'_'+str(rank)+'.dat', out_arr, fmt='%.7e')        # Save the data for this proc in Partial
-
+    
     comm.Barrier()
 
     if rank == 0:
