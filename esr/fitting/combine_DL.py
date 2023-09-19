@@ -11,13 +11,12 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-def main(comp, likelihood, print_frequency=1000):
+def main(comp, likelihood):
     """Combine the description lengths of all functions of a given complexity, sort by this and save to file.
     
     Args:
         :comp (int): complexity of functions to consider
         :likelihood (fitting.likelihood object): object containing data, likelihood functions and file paths
-        :print_frequency (int, default=1000): the status of the fits will be printed every ``print_frequency`` number of iterations
     
     Returns:
         None
@@ -25,14 +24,11 @@ def main(comp, likelihood, print_frequency=1000):
     """
     if likelihood.is_mse:
         raise ValueError('Cannot use MSE with description length')
-    
-    if rank == 0:
-        print('\nComputing description lengths', flush=True)
 
     unifn_file = likelihood.fn_dir + "/compl_%i/unique_equations_%i.txt"%(comp,comp)
     allfn_file = likelihood.fn_dir + "/compl_%i/all_equations_%i.txt"%(comp,comp)
     aifeyn_file = likelihood.fn_dir + "/compl_%i/%s%i.txt"%(comp,likelihood.fnprior_prefix,comp)
-
+    
     use_deriv = False
 
     with open(unifn_file, "r") as f:         # All
@@ -50,7 +46,7 @@ def main(comp, likelihood, print_frequency=1000):
     codelen = np.atleast_1d(codelen)
     index = np.atleast_1d(index)
     aifeyn = np.atleast_1d(aifeyn)
-
+    
     fcn_list_proc, data_start, data_end = test_all.get_functions(comp, likelihood)
 
     DL_min = np.zeros(len(fcn_list_proc))
@@ -65,16 +61,14 @@ def main(comp, likelihood, print_frequency=1000):
     xarr_proc = xarr[data_start:data_end]        # Which unique function indices this proc will look at
 
     for i in range(len(fcn_list_proc)):          # Loop over all unique fcns to find variant with min codelength
-        if rank==0 and i%print_frequency==0:
-            print(f'{i+1} of {len(fcn_list_proc)}', flush=True)
-            
-        negloglike_i, codelen_i, aifeyn_i = negloglike[index==xarr_proc[i]], codelen[index==xarr_proc[i]], aifeyn[index==xarr_proc[i]]           # Arrays of all variants for this unique fcn
-        
+        if rank==0 and i%100==0:
+            print(i, flush=True)
+        negloglike_i, codelen_i, aifeyn_i = negloglike[index==xarr_proc[i]], codelen[index==xarr_proc[i]], aifeyn[index==xarr_proc[i]]          # Arrays of all variants for this unique fcn
+
         m = (index==xarr_proc[i])
         fcn_list_all_i = [fcn_list_all[j] for j in range(len(m)) if m[j]]
         params_i = params[index==xarr_proc[i], :]
         DL = negloglike_i + codelen_i + aifeyn_i
-        
         if np.sum(~np.isnan(DL))==0:
             DL_min[i] = np.nan
             continue
@@ -82,13 +76,12 @@ def main(comp, likelihood, print_frequency=1000):
         DL_min[i] = np.nanmin(DL)
         params_min[i,:] = params_i[np.nanargmin(DL),:]
         fcn_min[i] = fcn_list_all_i[np.nanargmin(DL)]
-        
         negloglike_min[i] = negloglike_i[np.nanargmin(DL)]
         codelen_min[i] = codelen_i[np.nanargmin(DL)]
         aifeyn_min[i] = aifeyn_i[np.nanargmin(DL)]
-
+   
     out_arr = np.transpose(np.vstack([DL_min] + [params_min[:,i] for i in range(params_min.shape[1])] + [negloglike_min, codelen_min, aifeyn_min]))
-    
+
     prefix = likelihood.combineDL_prefix
 
     np.savetxt(likelihood.temp_dir + '/'+prefix+str(comp)+'_'+str(rank)+'.dat', out_arr, fmt='%.16e')        # Save the data for this proc in Partial
@@ -112,6 +105,7 @@ def main(comp, likelihood, print_frequency=1000):
         data = np.genfromtxt(likelihood.out_dir + '/'+prefix+'comp'+str(comp)+'.dat')            # This is the combined results from all procs, and the rest should be as before
         DL_min = data[:,0]
         params_min = data[:,1:1+params.shape[1]]
+        print(data.shape)
         negloglike_min = data[:,-3]
         codelen_min = data[:,-2]
         aifeyn_min = data[:,-1]
@@ -143,6 +137,7 @@ def main(comp, likelihood, print_frequency=1000):
             negloglike_sort = negloglike_min[indices_sort]
             codelen_sort = codelen_min[indices_sort]
             aifeyn_sort = aifeyn_min[indices_sort]
+            
         else:
             negloglike_sort = []
             codelen_sort = []
@@ -152,7 +147,7 @@ def main(comp, likelihood, print_frequency=1000):
         if os.path.exists(likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat'):           # Start this file from scratch here
             os.remove(likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat')
 
-        Nfuncs = 10
+        Nfuncs = 15
 
         Prel_DL = np.zeros(len(negloglike_sort))+np.inf
         negloglike_previous = np.nan
@@ -166,22 +161,44 @@ def main(comp, likelihood, print_frequency=1000):
         Prel /= np.sum(Prel)                # Relative probability of fcn, normalised over the top 1000 functions just of this complexity
 
         ptab = PrettyTable()
-        ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "AIFeyn"] + [f"a{i}" for i in range(params.shape[1])]
+        if likelihood.fnprior_prefix=="aifeyn_":
+            ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "AIFeyn"] + [f"a{i}" for i in range(params.shape[1])]
+        if likelihood.fnprior_prefix=="katz_logprior_2_":
+            ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Katz n=2"] + [f"a{i}" for i in range(params.shape[1])]
+        if likelihood.fnprior_prefix=="katz_logprior_3_":
+            ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Katz n=3"] + [f"a{i}" for i in range(params.shape[1])]
+        else:
+            ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Complx"] + [f"a{i}" for i in range(params.shape[1])]
+
 
         negloglike_previous = np.nan
-
+        
+        negloglike_list = []                    # This stores all the unique negloglikes, ie all the fcns I'm actually going to include
+        i_list = []
+        count_list = []
+        count = 0
+        
+        
         for i in range(len(DL_sort)):
+            if negloglike_sort[i] in negloglike_list:
+                continue
             
             # Only happens for non-duplicates; all Prels should be non-zero
             if i < Nfuncs:
-                ptab.add_row([i+1, fcn_min_sort[i], '%.2f'%DL_sort[i], '%.2e'%Prel[i], '%.2f'%negloglike_sort[i], '%.2f'%codelen_sort[i], '%.2e'%aifeyn_sort[i]] + [ '%.2e'%params_sort[i,j] for j in range(params.shape[1])])
+                ptab.add_row([count+1, fcn_min_sort[i], '%.2f'%DL_sort[i], '%.2e'%Prel[i], '%.2f'%negloglike_sort[i], '%.2f'%codelen_sort[i], '%.2e'%aifeyn_sort[i]] + [ '%.2e'%params_sort[i,j] for j in range(params.shape[1])])
 
             
             with open(likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat', 'a') as f:
                 writer = csv.writer(f, delimiter=';')
                 writer.writerow([i, fcn_min_sort[i], DL_sort[i], Prel[i], negloglike_sort[i], codelen_sort[i], aifeyn_sort[i]] + [params_sort[i,j] for j in range(params.shape[1])])
 
-            negloglike_previous = negloglike_sort[i]
+            
+            negloglike_list += [negloglike_sort[i]]
+            i_list += [i]
+            count_list += [count]
+            
+            count += 1          # This is literally position in the table, ie ignoring duplicates
+            print(count)
         
         if len(DL_sort) == 0:
             os.system("touch " + likelihood.out_dir + '/'+likelihood.final_prefix+str(comp)+'.dat')
