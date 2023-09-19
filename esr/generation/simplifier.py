@@ -15,11 +15,18 @@ import os
 
 import esr.generation.utils as utils
 from esr.generation.custom_printer import ESRPrinter
-from esr.fitting.sympy_symbols import *
 
 comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
+
+a, b = sympy.symbols('a b', real=True)
+inv = sympy.Lambda(a, 1/a)
+square = sympy.Lambda(a, a*a)
+cube = sympy.Lambda(a, a*a*a)
+pow_abs = sympy.Lambda((a,b), sympy.Pow(sympy.Abs(a, evaluate=False), b))
+sqrt_abs = sympy.Lambda(a, sympy.sqrt(sympy.Abs(a, evaluate=False)))
+log_abs = sympy.Lambda(a, sympy.log(sympy.Abs(a, evaluate=False)))
 
 class TimeoutException(Exception): pass
 
@@ -124,6 +131,7 @@ def make_changes(all_fun, all_sym, all_inv_subs, str_fun, sym_fun, inv_subs_fun)
     else:
         start_idx = 0
         imin = len(all_fun)
+#    end = time.time()
 
     start_idx = comm.gather(start_idx, root=0)
     if rank == 0:
@@ -192,7 +200,15 @@ def initial_sympify(all_fun, max_param, verbose=True, parallel=True, track_memor
         param_list = []
     
     sympy.init_printing(use_unicode=True)
-    locs = sympy_locs
+    locs = {"inv": inv,
+                "square": square,
+                "cube": cube,
+                "pow": pow_abs,
+                "Abs": sympy.Abs,
+                "x":x,
+                "sqrt_abs":sqrt_abs,
+                "log_abs":log_abs
+                }
                 
     if max_param > 0:
         for i in range(len(all_a)):
@@ -310,6 +326,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
 
     # Do some substitutions to simplify
     comm.Barrier()
+    #if rank == 0:
+     #   print('\t\tChecking combinations of constants')
+      #  sys.stdout.flush()
     comb = list(itertools.combinations(np.flip(np.arange(max_param)), 2))
     if max_param > 1:
         for c in comb:
@@ -415,6 +434,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
 
     # See if multiples of constants appear
     comm.Barrier()
+   # if rank == 0:
+    #    print('\t\tChecking multiples of constants')
+     #   sys.stdout.flush()
     if max_param > 0:
         for i in range(len(str_fun)):
             orig_fun = str_fun[i]
@@ -505,6 +527,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
                                 
     
     comm.Barrier()
+   # if rank == 0:
+    #    print('\t\tMaking changes')
+     #   sys.stdout.flush()
     all_fun, all_sym, all_inv_subs = make_changes(all_fun, all_sym, all_inv_subs, 
                                                 str_fun, sym_fun, inv_subs_fun)
 
@@ -527,6 +552,10 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
     if max_param > 1 and check_perm:
         use_a = list(all_a) + [1/a for a in all_a]
         perm = list(itertools.permutations(np.flip(np.arange(len(use_a))), len(all_a)))
+
+      #  if rank == 0:
+       #     print('\t\tChecking permutations of constants (%i, %i)'%(len(perm), len(str_fun)))
+        #    sys.stdout.flush()
 
         for i in range(len(str_fun)):
             orig_fun = str_fun[i]
@@ -559,7 +588,11 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
                 sym_fun[i] = orig_sym
 
         comm.Barrier()
-                
+                    
+       # if rank == 0:
+        #    print('\t\tMaking changes')
+         #   sys.stdout.flush()
+
         change_indices = comm.gather(change_indices, root=0)
         ref_indices = comm.gather(ref_indices, root=0)
         new_inv_subs = comm.gather(new_inv_subs, root=0)
@@ -596,6 +629,10 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
         change_indices = []
         ref_indices = []
         new_inv_subs = []
+        
+       # if rank == 0:
+        #    print('\t\tChecking negatives of constants')
+         #   sys.stdout.flush()
 
         # See if function with a0 -> -a0 already in list
         for i in range(len(str_fun)):
@@ -626,6 +663,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
                 sym_fun[i] = orig_sym
         
         comm.Barrier()
+      #  if rank == 0:
+       #     print('\t\tMaking changes')
+        #    sys.stdout.flush()
         change_indices = comm.gather(change_indices, root=0)
         ref_indices = comm.gather(ref_indices, root=0)
         new_inv_subs = comm.gather(new_inv_subs, root=0)
@@ -658,6 +698,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
 
         # Check parameters are in correct order
         comm.Barrier()
+        if rank == 0:
+            print('\t\tChecking order of constants')
+            sys.stdout.flush()
         for i in range(len(str_fun)):
             orig_fun = str_fun[i]
             orig_sym = sym_fun[i]
@@ -694,6 +737,9 @@ def sympy_simplify(all_fun, all_sym, all_inv_subs, max_param, expand_fun=True, t
             str_fun[i] = str(sympy.core.numbers.NaN)
         
     comm.Barrier()
+    if rank == 0:
+        print('\t\tMaking changes')
+        sys.stdout.flush()
         
     all_fun, all_sym, all_inv_subs = make_changes(all_fun, all_sym, all_inv_subs, 
                                                 str_fun, sym_fun, inv_subs_fun)
@@ -801,23 +847,35 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
             print('\tGetting unique functions')
         sys.stdout.flush()
         
+      #  start = time.time()
         uniq, match = utils.get_unique_indexes(all_fun)
         uniq_fun = list(uniq.keys())
+      #  end = time.time()
 
         if rank == 0:
             if track_memory:
                 utils.using_mem("end")
                 utils.locals_size(locals())
+       #     print('\t', end - start)
             print('\tGetting unique sympy')
         sys.stdout.flush()
         
+        #start = time.time()
         all_sym = [all_sym[u] for u in uniq_fun]
+        #end = time.time()
         
         if rank == 0:
+         #   print('\t', end - start)
             print('\tGetting unique inverse subs')
         sys.stdout.flush()
         
+       # start = time.time()
         uniq_inv_subs = [all_inv_subs[i] for i in uniq.values()]
+       # end = time.time()
+        
+        #if rank == 0:
+        #    print('\t', end - start)
+        #sys.stdout.flush()
 
         del uniq; gc.collect()
 
@@ -826,7 +884,7 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
         nparam = count_params(uniq_fun, max_param)
         for i in range(max_param+1):
             if rank == 0:
-                print('\t\tnparam = %i'%i)
+                print('\tnparam = %i'%i)
             sys.stdout.flush()
             
             check_perm = (count != 0)
@@ -867,7 +925,13 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
             print('\tMaking dict')
         sys.stdout.flush()
         
+      #  start = time.time()
         all_sym = dict(zip(uniq_fun,all_sym))
+       # end = time.time()
+        
+       # if rank == 0:
+       #     print('\t', end - start)
+       # sys.stdout.flush()
                 
         if rank == 0:
             new_nuniq = len(set(all_fun))
@@ -876,6 +940,7 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
         new_nuniq = comm.bcast(new_nuniq, root=0)
 
         if rank == 0:
+        #    print('\t', end-start)
 
             print('\tPrinting inv_subs to file')
             data = [i for i in range(len(all_inv_subs)) if all_inv_subs[i] is not None]
@@ -935,23 +1000,35 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
             print('\tGetting unique functions')
         sys.stdout.flush()
         
+      #  start = time.time()
         uniq, match = utils.get_unique_indexes(all_fun)
         uniq_fun = list(uniq.keys())
+      #  end = time.time()
 
         if rank == 0:
             if track_memory:
                 utils.using_mem("end")
                 utils.locals_size(locals())
+       #     print('\t', end - start)
             print('\tGetting unique sympy')
         sys.stdout.flush()
 
+        #start = time.time()
         all_sym = [all_sym[u] for u in uniq_fun]
+        #end = time.time()
         
         if rank == 0:
+         #   print('\t', end - start)
             print('\tGetting unique inverse subs')
-        sys.stdout.flush()
+        #sys.stdout.flush()
         
+        #start = time.time()
         uniq_inv_subs = [all_inv_subs[i] for i in uniq.values()]
+        #end = time.time()
+        
+        #if rank == 0:
+         #   print('\t', end - start)
+        #sys.stdout.flush()
 
         del uniq; gc.collect()
         
@@ -960,7 +1037,7 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
         nparam = count_params(uniq_fun, max_param)
         for i in range(max_param+1):
             if rank == 0:
-                print('\t\tnparam = %i'%i)
+                print('\tnparam = %i'%i)
             sys.stdout.flush()
 
             check_perm = True
@@ -1001,7 +1078,13 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
             print('\tMaking dict')
         sys.stdout.flush()
         
+       # start = time.time()
         all_sym = dict(zip(uniq_fun, all_sym))
+       # end = time.time()
+
+       # if rank == 0:
+       #     print('\t', end - start)
+       # sys.stdout.flush()
                 
         if rank == 0:
             new_nuniq = len(set(all_fun))
@@ -1010,6 +1093,7 @@ def do_sympy(all_fun, all_sym, compl, search_tmax, expand_tmax, dirname, track_m
         new_nuniq = comm.bcast(new_nuniq, root=0)
 
         if rank == 0:
+        #    print('\t', end-start)
 
             print('\tPrinting inv_subs to file')
             data = [i for i in range(len(all_inv_subs)) if all_inv_subs[i] is not None]
@@ -1144,8 +1228,14 @@ def load_subs(fname, max_param, use_sympy=True, bcast_res=True):
     if max_param == 1:
         all_a = [all_a]
         
-    locs = sympy_locs
-    
+    locs = {"inv": inv,
+            "square": square,
+            "cube": cube,
+            "pow": pow_abs,
+            "Abs": sympy.Abs,
+            "sqrt_abs":sqrt_abs,
+            "log_abs":log_abs
+            }
     if max_param > 0:
         for i in range(len(all_a)):
             locs["a%i"%i] = all_a[i]
@@ -1317,7 +1407,15 @@ def check_results(dirname, compl, tmax=10):
     if max_param == 1:
         all_a = [all_a]
     x = sympy.symbols('x', positive=True)
-    locs = sympy_locs
+    locs = {"inv": inv,
+            "square": square,
+            "cube": cube,
+            "pow": pow_abs,
+            "Abs": sympy.Abs,
+            "sqrt_abs":sqrt_abs,
+            "log_abs":log_abs,
+            "x":x
+            }
     if max_param > 0:
         for i in range(len(all_a)):
             locs["a%i"%i] = all_a[i]
@@ -1331,17 +1429,11 @@ def check_results(dirname, compl, tmax=10):
         if all_nparam[i] != uniq_nparam[matches[i]]:
             continue
         s1 = sympy.sympify(all_fun[i], locals=locs)
-        try:
-            s2 = sympy.sympify(uniq_fun[matches[i]], locals=locs)
-        except:
-            print(f'Could not check {uniq_fun[matches[i]]} so will keep equation')
-            s2 = None
+        s2 = sympy.sympify(uniq_fun[matches[i]], locals=locs)
 
         p = sympy.Array(sympy.symbols(" ".join(param_list), real=True))
         
         try:
-            if s2 is None:
-                raise ValueError
             with time_limit(tmax):
                 for j in range(len(inv_subs[i])):
                     inv_subs[i][j] = inv_subs[i][j].replace("{", "{'")
@@ -1412,8 +1504,10 @@ def check_results(dirname, compl, tmax=10):
                 pp.pprint(s)
         del uniq_fun; gc.collect()
         s = "sed 's/.$//; s/^.//' %s/%s%i.txt > %s/temp_%i.txt"%(dirname,'unique_equations_',compl,dirname,compl)
+       # print(s)
         os.system(s)
         s = "mv %s/temp_%i.txt %s/%s%i.txt"%(dirname,compl,dirname,'unique_equations_',compl)
+       # print(s)
         os.system(s)
 
         print('\nChanging inverse subs')
