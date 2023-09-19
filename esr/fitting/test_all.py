@@ -82,31 +82,6 @@ def get_functions(comp, likelihood, unique=True):
     with open(unifn_file, "r") as f:
         fcn_list = f.readlines()
     
-    
-    
-    # # get all trees for unique fn. if any of them has [inv, inv], then discard
-    
-    # all_trees = likelihood.fn_dir + "/compl_%i/trees_%i.txt"%(comp,comp)
-    # with open(all_trees, "r") as ff:
-    #     tree_list = ff.readlines()
-    # print(tree_list[:3])
-    # matches = likelihood.fn_dir + "/compl_%i/matches_%i.txt"%(comp,comp)
-    # with open(matches, "r") as fff:
-    #     matches_list = fff.readlines()
-    
-    # indexes_unique = np.arange(0, len(fcn_list) )
-    
-    # uni_tree_inds = np.argwhere(matches_list==indexes_unique)
-    
-    # uni_trees = np.zeros(len(fcn_list))
-    # print(len(uni_tree_inds))
-    
-    # for el in range(len(uni_tree_inds)):
-    #     print(uni_tree_inds[el])
-    #     uni_trees[el] = tree_list[uni_tree_inds[el]]
-        
-    
-    
     nLs = int(np.ceil(len(fcn_list) / float(size)))       # Number of lines per file for given thread
 
     while nLs*(size-1) > len(fcn_list):
@@ -124,7 +99,7 @@ def get_functions(comp, likelihood, unique=True):
     if rank==size-1:
         data_end = len(fcn_list)
     
-    return fcn_list[data_start:data_end], data_start, data_end #, previous_unifn_list
+    return fcn_list[data_start:data_end], data_start, data_end 
     
     
 def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax , comp=0, try_integration=False, 
@@ -170,10 +145,7 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax , comp=0, try_integration=F
             return np.inf, params
     
     if "x" not in fcn_i or "exp(log" in fcn_i or "log(exp" in fcn_i:
-        return np.inf, params
-    if fcn_i.count('x')==fcn_i.count('exp'): # just the same as nparam=0. change 
-        return np.inf, params
-    
+        return np.inf, params    
     
 
     Niter = int(np.sum(nparam ** np.arange(len(Niter_params)) * np.array(Niter_params)))
@@ -293,12 +265,6 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax , comp=0, try_integration=F
                     flag_three = True
                     inpt = np.random.uniform(pmin,pmax)
                     res = minimize(chi2_fcn, inpt, args=(likelihood, eq_numpy, integrated, None, fcn_i, V_1, V_2), method="BFGS", options={'maxiter': 5000})
-                    
-            # if res.nit==0:
-            #     print('---------------')
-            #     chi2_i=np.inf
-            #     params = np.zeros(max_param)
-            #     return chi2_i, params
                 
             if not res.success:
                 continue
@@ -367,8 +333,7 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax , comp=0, try_integration=F
             params[:] = 0.
     
     except Exception as e:
-        print('EXCEPtion')
-        print(e)
+        print('Exception',e)
         traceback.print_exc()
         return np.nan, params
 
