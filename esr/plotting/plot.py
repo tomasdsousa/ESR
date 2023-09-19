@@ -29,16 +29,19 @@ def pareto_plot(dirname, savename, do_DL=True, do_logL=True):
         print(i, fname)
         
         with open(dirname + '/' + fname, 'r') as f:
+            
             reader = csv.reader(f, delimiter=';')
             data = [row for row in reader]
             data = np.array([d[2:7] for d in data], dtype=float)
             
+
         # Get min DL
         all_DL[i] = np.nanmin(data[:,0])
         all_logL[i] = np.nanmin(data[:,2])
+        print(all_DL[i], all_logL[i])
     
-    all_DL -= np.nanmin(all_DL)
-    all_logL -= np.nanmin(all_logL)
+    all_DL -= np.amin(all_DL)
+    all_logL -= np.amin(all_logL)
 
     fig, ax1 = plt.subplots(1, 1, figsize=(5,3.5), sharex=True)
     cm = plt.get_cmap('Set1')
@@ -85,8 +88,6 @@ def pareto_plot(dirname, savename, do_DL=True, do_logL=True):
     fig.tight_layout()
     fig.savefig(dirname + '/' + savename, bbox_inches='tight')
     print(dirname + '/' + savename)
-#    fig.clf()
-#    plt.close(fig)
     plt.show()
         
     return
