@@ -6,7 +6,7 @@ import sys
 from mpi4py import MPI
 from scipy.optimize import minimize
 import itertools
-
+import traceback
 from esr.fitting.sympy_symbols import *
 import esr.generation.simplifier as simplifier
 
@@ -42,7 +42,6 @@ def chi2_fcn(x, likelihood, eq_numpy, integrated, signs, fstring, deriv1, deriv2
             elif signs[i] == '-':
                 p[i] = - 10 ** x[i]
             else:
-                print('raising inside chi2_fun')
                 raise ValueError
     return likelihood.negloglike(p,eq_numpy, fcn_i=fstring, dd1=deriv1, dd2=deriv2, integrated=integrated)
     
@@ -82,7 +81,32 @@ def get_functions(comp, likelihood, unique=True):
 
     with open(unifn_file, "r") as f:
         fcn_list = f.readlines()
-
+    
+    
+    
+    # # get all trees for unique fn. if any of them has [inv, inv], then discard
+    
+    # all_trees = likelihood.fn_dir + "/compl_%i/trees_%i.txt"%(comp,comp)
+    # with open(all_trees, "r") as ff:
+    #     tree_list = ff.readlines()
+    # print(tree_list[:3])
+    # matches = likelihood.fn_dir + "/compl_%i/matches_%i.txt"%(comp,comp)
+    # with open(matches, "r") as fff:
+    #     matches_list = fff.readlines()
+    
+    # indexes_unique = np.arange(0, len(fcn_list) )
+    
+    # uni_tree_inds = np.argwhere(matches_list==indexes_unique)
+    
+    # uni_trees = np.zeros(len(fcn_list))
+    # print(len(uni_tree_inds))
+    
+    # for el in range(len(uni_tree_inds)):
+    #     print(uni_tree_inds[el])
+    #     uni_trees[el] = tree_list[uni_tree_inds[el]]
+        
+    
+    
     nLs = int(np.ceil(len(fcn_list) / float(size)))       # Number of lines per file for given thread
 
     while nLs*(size-1) > len(fcn_list):
@@ -100,10 +124,10 @@ def get_functions(comp, likelihood, unique=True):
     if rank==size-1:
         data_end = len(fcn_list)
     
-    return fcn_list[data_start:data_end], data_start, data_end
+    return fcn_list[data_start:data_end], data_start, data_end #, previous_unifn_list
     
     
-def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False, 
+def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax , comp=0, try_integration=False, 
                  log_opt=True, max_param=4, Niter_params=[40,60], Nconv_params=[-5,20]):
     """Optimise the parameters of a function to fit data
     
@@ -130,15 +154,28 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
     """
     xvar, yvar = likelihood.xvar, likelihood.yvar
     
+    print(fcn_i)
+
     nparam = simplifier.count_params([fcn_i], max_param)[0]
     params = np.zeros(max_param)
     
-    if "x" not in fcn_i or "exp(log" in fcn_i or "log(exp" in fcn_i or "exp(sin" in fcn_i or "sin(exp" in fcn_i: # the last 2 checks are arbitrary
+    if comp>4:
+        previous_fns_file = likelihood.fn_dir + "/compl_"+str(comp)+"/previous_eqns_"+str(comp)+".txt"
+        with open(previous_fns_file, "r") as f:
+            previous_fns = f.readlines()
+    
+        # discard repeat of lower complexity (e.g. [inv, inv, ...])
+        if fcn_i in previous_fns:
+            print('PREVIOUS')
+            return np.inf, params
+    
+    if "x" not in fcn_i or "exp(log" in fcn_i or "log(exp" in fcn_i:
         return np.inf, params
-    if fcn_i.count('x')==fcn_i.count('exp'): # constant function
+    if fcn_i.count('x')==fcn_i.count('exp'): # just the same as nparam=0. change 
         return np.inf, params
     
-    print(fcn_i)
+    
+
     Niter = int(np.sum(nparam ** np.arange(len(Niter_params)) * np.array(Niter_params)))
     Nconv = int(np.sum(nparam ** np.arange(len(Nconv_params)) * np.array(Nconv_params)))
     if (Nconv <= 0) or (Niter <= 0) or (Nconv > Niter):
@@ -203,7 +240,6 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
             flag_three = True
         
         for j in range(Niter): 
-            """have to do the sympy stuff outdside of this loop"""
         
             if nparam > 2:
                 inpt = [np.random.uniform(pmin,pmax) for _ in range(nparam)]
@@ -258,6 +294,11 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
                     inpt = np.random.uniform(pmin,pmax)
                     res = minimize(chi2_fcn, inpt, args=(likelihood, eq_numpy, integrated, None, fcn_i, V_1, V_2), method="BFGS", options={'maxiter': 5000})
                     
+            # if res.nit==0:
+            #     print('---------------')
+            #     chi2_i=np.inf
+            #     params = np.zeros(max_param)
+            #     return chi2_i, params
                 
             if not res.success:
                 continue
@@ -286,7 +327,7 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
             if count_lowest==Nconv:
                 break
         
-        if chi2_min < 1.e100:
+        if chi2_min < 1.e10:
             # Optimisation happened. Print something
             if flag_three:
                 params = np.pad(np.array(best.x), (0, max_param-len(best.x)))
@@ -296,17 +337,23 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
         elif not np.isfinite(chi2_min):
             print('Failed to find parameters for function:', fcn_i)
                  
+        if chi2_min==1e10:
+            chi2_i = np.nan
+            params[:] = 0.
+            return chi2_i, params
+            
         # This is after all the iterations, so it's the best we have; reduced chi2
         chi2_i = chi2_min
 
     except NameError:
+        print(NameError)
         # Occurs if function produced not implemented in numpy
         raise NameError
 
     except simplifier.TimeoutException:
         print('TIMED OUT:', fcn_i, flush=True)
         try:
-            if chi2_min < 1.e100:
+            if chi2_min < 1.e10:
                 if flag_three:
                     params = np.pad(np.array(best.x), (0, max_param-len(best.x)))
                 else:
@@ -320,6 +367,9 @@ def optimise_fun(fcn_i, likelihood, tmax, pmin, pmax, try_integration=False,
             params[:] = 0.
     
     except Exception as e:
+        print('EXCEPtion')
+        print(e)
+        traceback.print_exc()
         return np.nan, params
 
     return chi2_i, params
@@ -351,7 +401,20 @@ def main(comp, likelihood, tmax=5, pmin=-11, pmax=11, try_integration=False,
     
     """
 
-    fcn_list_proc, _, _ = get_functions(comp, likelihood)
+    fcn_list_proc, _, _  = get_functions(comp, likelihood)
+    
+    if rank==0:
+        previous_unifn_list = []
+        if comp>4: 
+            for compl in range(4,comp):
+                unifn_file_i = likelihood.fn_dir + "/compl_%i/unique_equations_%i.txt"%(compl,compl)
+                with open(unifn_file_i, "r") as f:
+                    fcn_list_i = f.readlines()
+                previous_unifn_list += fcn_list_i
+        previous_unifn_list = np.array(previous_unifn_list)
+        np.savetxt(likelihood.fn_dir + "/compl_"+str(comp)+"/previous_eqns_"+str(comp)+".txt", previous_unifn_list, fmt='%s')
+
+    comm.Barrier()
     
     # Set max param >=4 for backwards compatibility
     max_param = int(max(4, np.floor((comp - 1) / 2)))
@@ -362,13 +425,16 @@ def main(comp, likelihood, tmax=5, pmin=-11, pmax=11, try_integration=False,
         if rank == 0:
             print(rank, i, len(fcn_list_proc), flush=True)
         try:
-            with simplifier.time_limit(100):
+            nparam = simplifier.count_params([fcn_list_proc[i]], max_param)[0]
+            time_limits = [0, 60, 120, 180, 200]
+            with simplifier.time_limit(time_limits[nparam]):
                 try:
                     chi2[i], params[i,:] = optimise_fun(fcn_list_proc[i], 
                                                     likelihood, 
                                                     tmax, 
                                                     pmin, 
                                                     pmax, 
+                                                    comp=comp,
                                                     try_integration=try_integration,
                                                     log_opt=log_opt,
                                                     max_param=max_param,
@@ -380,7 +446,8 @@ def main(comp, likelihood, tmax=5, pmin=-11, pmax=11, try_integration=False,
                                                     likelihood, 
                                                     tmax, 
                                                     pmin, 
-                                                    pmax, 
+                                                    pmax,
+                                                    comp=comp,
                                                     try_integration=False,
                                                     log_opt=log_opt,
                                                     max_param=max_param,
