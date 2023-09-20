@@ -163,9 +163,9 @@ def main(comp, likelihood):
         ptab = PrettyTable()
         if likelihood.fnprior_prefix=="aifeyn_":
             ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "AIFeyn"] + [f"a{i}" for i in range(params.shape[1])]
-        if likelihood.fnprior_prefix=="katz_logprior_2_":
+        elif likelihood.fnprior_prefix=="katz_logprior_2_":
             ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Katz n=2"] + [f"a{i}" for i in range(params.shape[1])]
-        if likelihood.fnprior_prefix=="katz_logprior_3_":
+        elif likelihood.fnprior_prefix=="katz_logprior_3_":
             ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Katz n=3"] + [f"a{i}" for i in range(params.shape[1])]
         else:
             ptab.field_names = ["Rank", "Function", "L(D)", "Prel", "-logL", "Codelen", "Complx"] + [f"a{i}" for i in range(params.shape[1])]
